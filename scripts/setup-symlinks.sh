@@ -118,12 +118,13 @@ echo "This script will symlink the following directories:"
 echo ""
 echo "To NETSCRATCH (ephemeral - ok to lose on monthly cleanup):"
 echo "  ~/.cache           - General caches (pip, huggingface, torch hub, etc.)"
-echo "  ~/.nv              - NVIDIA/CUDA cache"
-echo "  ~/.triton          - Triton (GPU compiler) cache"
-echo "  ~/.npm             - npm cache"
 echo ""
 echo "To TIER1 (persistent):"
-echo "  ~/.conda           - Conda environments"
+echo "  ~/.conda           - Conda environments (if using conda)"
+echo ""
+echo "NOT symlinked (kept in home, small but expensive to rebuild):"
+echo "  ~/.nv              - NVIDIA/CUDA cache"
+echo "  ~/.triton          - Triton (GPU compiler) cache"
 echo ""
 read -p "Continue? [y/N] " confirm
 if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
@@ -133,9 +134,6 @@ fi
 
 # Symlinks to netscratch (ephemeral caches)
 setup_symlink ".cache" "$NETSCRATCH" "general caches (pip, huggingface, torch hub, etc.)"
-setup_symlink ".nv" "$NETSCRATCH" "NVIDIA/CUDA cache"
-setup_symlink ".triton" "$NETSCRATCH" "Triton GPU compiler cache"
-setup_symlink ".npm" "$NETSCRATCH" "npm cache"
 
 # Symlinks to tier1 (persistent - environments take time to recreate)
 setup_symlink ".conda" "$TIER1" "conda environments"

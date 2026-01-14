@@ -147,35 +147,19 @@ ln -s /n/alvarez_lab_tier1/Users/$USER/.conda ~/.conda
 
 Skip this step if you don't use conda or plan to switch to uv.
 
-#### ~/.nv → netscratch
-
-NVIDIA/CUDA compilation cache. Safe to delete - regenerates automatically.
-
-```bash
-rm -rf ~/.nv
-mkdir -p /n/netscratch/${LAB}/Lab/Users/$USER/.nv
-ln -s /n/netscratch/${LAB}/Lab/Users/$USER/.nv ~/.nv
-```
-
-#### ~/.triton → netscratch
-
-Triton GPU compiler cache. Safe to delete - regenerates automatically.
-
-```bash
-rm -rf ~/.triton
-mkdir -p /n/netscratch/${LAB}/Lab/Users/$USER/.triton
-ln -s /n/netscratch/${LAB}/Lab/Users/$USER/.triton ~/.triton
-```
-
 #### Verify symlinks
 
 ```bash
-ls -la ~/.cache ~/.nv ~/.triton
+ls -la ~/.cache
 # If using conda:
 ls -la ~/.conda
 ```
 
 You should see arrows (`->`) pointing to the target locations.
+
+#### What about ~/.nv and ~/.triton?
+
+These CUDA/Triton compiler caches are small (typically < 1 GB combined) but expensive to rebuild. We recommend **keeping them in home** rather than symlinking to netscratch. The monthly cleanup would force recompilation, which can add minutes to your first job after cleanup. The home quota savings aren't worth the annoyance.
 
 ### 4. Verify Storage Access
 
@@ -588,11 +572,9 @@ Summary of symlinks set up in [Initial Setup](#2-set-up-home-directory-symlinks)
 
 ### Symlinked to Netscratch (ephemeral, ok to lose)
 
-| Directory   | Purpose                                             | Typical size |
-| ----------- | --------------------------------------------------- | ------------ |
-| `~/.cache`  | General application caches (pip, huggingface, etc.) | 10-100+ GB   |
-| `~/.nv`     | NVIDIA/CUDA compilation cache                       | 10-100+ MB   |
-| `~/.triton` | Triton GPU compiler cache                           | 10-500+ MB   |
+| Directory  | Purpose                                             | Typical size |
+| ---------- | --------------------------------------------------- | ------------ |
+| `~/.cache` | General application caches (pip, huggingface, etc.) | 10-100+ GB   |
 
 ### Symlinked to Tier1 (persistent)
 
@@ -600,14 +582,16 @@ Summary of symlinks set up in [Initial Setup](#2-set-up-home-directory-symlinks)
 | ---------- | ----------------------------------- | ---------------------------------- |
 | `~/.conda` | Conda environments (if using conda) | Environments take time to recreate |
 
-### Left in Home (small, important)
+### Left in Home (small, worth keeping)
 
-| Directory                 | Purpose             |
-| ------------------------- | ------------------- |
-| `~/.ssh`                  | SSH keys            |
-| `~/.config`               | Application configs |
-| `~/.bashrc`, `~/.profile` | Shell config        |
-| `~/.jupyter`              | Jupyter config      |
+| Directory                 | Purpose                            | Notes                               |
+| ------------------------- | ---------------------------------- | ----------------------------------- |
+| `~/.ssh`                  | SSH keys                           | Critical, keep secure               |
+| `~/.config`               | Application configs                | Small                               |
+| `~/.bashrc`, `~/.profile` | Shell config                       | Small                               |
+| `~/.jupyter`              | Jupyter config                     | Small                               |
+| `~/.nv`                   | NVIDIA/CUDA compilation cache      | Small, expensive to rebuild         |
+| `~/.triton`               | Triton GPU compiler cache          | Small, expensive to rebuild         |
 
 ---
 
