@@ -106,59 +106,73 @@ First, create your netscratch user directory if it doesn't exist:
 mkdir -p /n/netscratch/${LAB}/Lab/Users/$USER
 ```
 
-Now create the symlinks. For each directory below, we'll:
+#### ~/.cache → netscratch
 
-1. Move any existing data to the target location
-2. Create a symlink from home to the target
-
-**~/.cache → netscratch** (general caches - pip, huggingface, torch hub, etc.):
+General caches (pip, huggingface models, torch hub, etc.). Safe to delete - everything will re-download as needed.
 
 ```bash
-# Move existing cache if present
-if [ -d ~/.cache ] && [ ! -L ~/.cache ]; then
-    mv ~/.cache /n/netscratch/${LAB}/Lab/Users/$USER/.cache
-fi
-# Create target directory and symlink
+# Remove existing cache (will regenerate as needed)
+rm -rf ~/.cache
+
+# Create symlink
 mkdir -p /n/netscratch/${LAB}/Lab/Users/$USER/.cache
-ln -sf /n/netscratch/${LAB}/Lab/Users/$USER/.cache ~/.cache
+ln -s /n/netscratch/${LAB}/Lab/Users/$USER/.cache ~/.cache
 ```
 
-**~/.conda → tier1** (conda environments - persistent, takes time to rebuild):
+#### ~/.conda → tier1 (if using conda)
+
+**Important:** Conda environments have hardcoded paths and **cannot be moved**. If you try to move them, they will break. You must delete and rebuild.
+
+If you're new to the cluster, we recommend using **uv** instead of conda - it's faster, more reproducible, and doesn't have this problem. See the [Python Environment Setup](#python-environment-setup-with-uv) section.
+
+If you're an existing conda user and want to set up the symlink:
 
 ```bash
-# Move existing conda if present
-if [ -d ~/.conda ] && [ ! -L ~/.conda ]; then
-    mv ~/.conda /n/alvarez_lab_tier1/Users/$USER/.conda
-fi
-# Create target directory and symlink
+# Check what conda environments you have
+conda env list
+
+# If you have environments you need, export them first:
+# conda env export -n myenv > myenv.yml
+
+# Remove conda directory (this deletes all environments!)
+rm -rf ~/.conda
+
+# Create symlink to tier1
 mkdir -p /n/alvarez_lab_tier1/Users/$USER/.conda
-ln -sf /n/alvarez_lab_tier1/Users/$USER/.conda ~/.conda
+ln -s /n/alvarez_lab_tier1/Users/$USER/.conda ~/.conda
+
+# Recreate environments from exported files:
+# conda env create -f myenv.yml
 ```
 
-**~/.nv → netscratch** (NVIDIA/CUDA compilation cache):
+Skip this step if you don't use conda or plan to switch to uv.
+
+#### ~/.nv → netscratch
+
+NVIDIA/CUDA compilation cache. Safe to delete - regenerates automatically.
 
 ```bash
-if [ -d ~/.nv ] && [ ! -L ~/.nv ]; then
-    rm -rf ~/.nv  # Safe to delete, will regenerate
-fi
+rm -rf ~/.nv
 mkdir -p /n/netscratch/${LAB}/Lab/Users/$USER/.nv
-ln -sf /n/netscratch/${LAB}/Lab/Users/$USER/.nv ~/.nv
+ln -s /n/netscratch/${LAB}/Lab/Users/$USER/.nv ~/.nv
 ```
 
-**~/.triton → netscratch** (Triton GPU compiler cache):
+#### ~/.triton → netscratch
+
+Triton GPU compiler cache. Safe to delete - regenerates automatically.
 
 ```bash
-if [ -d ~/.triton ] && [ ! -L ~/.triton ]; then
-    rm -rf ~/.triton  # Safe to delete, will regenerate
-fi
+rm -rf ~/.triton
 mkdir -p /n/netscratch/${LAB}/Lab/Users/$USER/.triton
-ln -sf /n/netscratch/${LAB}/Lab/Users/$USER/.triton ~/.triton
+ln -s /n/netscratch/${LAB}/Lab/Users/$USER/.triton ~/.triton
 ```
 
-Verify your symlinks:
+#### Verify symlinks
 
 ```bash
-ls -la ~/.cache ~/.conda ~/.nv ~/.triton
+ls -la ~/.cache ~/.nv ~/.triton
+# If using conda:
+ls -la ~/.conda
 ```
 
 You should see arrows (`->`) pointing to the target locations.
@@ -344,6 +358,227 @@ uv add ipykernel
 4. The kernel will automatically use the project's `.venv`
 
 **How it works:** The kernel runs `uv run`, which searches upward from the notebook's location to find a `pyproject.toml`. It then activates that project's environment.
+
+---
+
+## AWS and S3 Buckets
+
+All lab outputs (model weights, analysis results, figures) should be stored in S3 buckets. This provides:
+- Reliable cloud backup (AWS 99.99% durability)
+- Access from anywhere (cluster, laptops, Lightning AI, workstations)
+- Easy sharing within and outside the lab
+
+### 1. Install AWS CLI Tools
+
+Install `awscli` and `s5cmd` globally using uv:
+
+```bash
+uv tool install awscli
+uv tool install s5cmd
+```
+
+Verify installation:
+
+```bash
+aws --version
+s5cmd version
+```
+
+These tools are now available in any terminal session without activating a specific environment.
+
+### 2. Verify AWS Access
+
+Test your credentials (you should have set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in your bashrc):
+
+```bash
+# List buckets you have access to
+aws s3 ls
+```
+
+You should see at least:
+- `visionlab-members` - Shared lab bucket for outputs
+- `visionlab-datasets` - Common datasets
+
+List contents of a bucket:
+
+```bash
+# Using aws cli
+aws s3 ls s3://visionlab-members/
+
+# Using s5cmd (faster for large listings)
+s5cmd ls s3://visionlab-members/
+```
+
+### 3. Basic S3 Operations
+
+**Copy files to/from S3:**
+
+```bash
+# Upload a file
+aws s3 cp local_file.pt s3://visionlab-members/$USER/models/
+
+# Download a file
+aws s3 cp s3://visionlab-members/$USER/models/model.pt ./
+
+# Sync a directory (only copies changed files)
+aws s3 sync ./results s3://visionlab-members/$USER/experiment1/results/
+```
+
+**Using s5cmd (faster for bulk operations):**
+
+```bash
+# Copy with parallelism
+s5cmd cp local_file.pt s3://visionlab-members/$USER/models/
+
+# Sync directory
+s5cmd sync ./results s3://visionlab-members/$USER/experiment1/results/
+```
+
+### 4. Python Access (fsspec/boto3)
+
+Create a test project to explore Python S3 access:
+
+```bash
+cd $SANDBOX_DIR
+mkdir s3-test && cd s3-test
+uv init
+uv add fsspec s3fs boto3 ipykernel
+```
+
+**Using fsspec (recommended - unified interface):**
+
+```python
+import fsspec
+
+# Create S3 filesystem
+fs = fsspec.filesystem('s3')
+
+# List bucket contents
+fs.ls('visionlab-members')
+
+# Read a file directly
+with fs.open('s3://visionlab-members/path/to/file.json') as f:
+    data = f.read()
+
+# Write a file
+with fs.open('s3://visionlab-members/myuser/test.txt', 'w') as f:
+    f.write('Hello from Python!')
+
+# Works with pandas too
+import pandas as pd
+df = pd.read_csv('s3://visionlab-members/path/to/data.csv')
+df.to_parquet('s3://visionlab-members/myuser/data.parquet')
+```
+
+**Using boto3 (lower-level, more control):**
+
+```python
+import boto3
+
+s3 = boto3.client('s3')
+
+# List objects
+response = s3.list_objects_v2(Bucket='visionlab-members', Prefix='myuser/')
+for obj in response.get('Contents', []):
+    print(obj['Key'])
+
+# Upload file
+s3.upload_file('local_file.pt', 'visionlab-members', 'myuser/models/model.pt')
+
+# Download file
+s3.download_file('visionlab-members', 'myuser/models/model.pt', 'local_model.pt')
+```
+
+Clean up test project:
+
+```bash
+rm -rf $SANDBOX_DIR/s3-test
+```
+
+### 5. Mounting S3 Buckets (rclone)
+
+For workflows that need filesystem-like access to S3 (e.g., training code that expects local paths), we use rclone FUSE mounts. This creates a local directory that transparently reads/writes to S3.
+
+#### One-time rclone setup
+
+Install rclone and create the config:
+
+```bash
+# Install rclone (if not already available)
+# On the cluster, rclone may be available via module or already installed
+
+# Create rclone config
+mkdir -p ~/.config/rclone
+
+cat > ~/.config/rclone/rclone.conf << 'EOF'
+[s3_remote]
+type = s3
+provider = AWS
+env_auth = true
+region = us-east-1
+EOF
+```
+
+Test rclone can access your buckets:
+
+```bash
+rclone lsd s3_remote:
+```
+
+#### Download mount scripts
+
+Copy the bucket mounting scripts to your Buckets directory:
+
+```bash
+cd $BUCKET_DIR
+
+# Download scripts
+curl -O https://raw.githubusercontent.com/harvard-visionlab/setup/main/scripts/s3_bucket_mount.sh
+curl -O https://raw.githubusercontent.com/harvard-visionlab/setup/main/scripts/s3_bucket_unmount.sh
+curl -O https://raw.githubusercontent.com/harvard-visionlab/setup/main/scripts/s3_zombie_sweep.sh
+
+chmod +x s3_bucket_*.sh s3_zombie_sweep.sh
+```
+
+#### Mount a bucket
+
+```bash
+cd $BUCKET_DIR
+
+# Mount visionlab-members bucket
+./s3_bucket_mount.sh . visionlab-members
+
+# Now you can access it like a local directory
+ls visionlab-members/
+```
+
+The script:
+1. Creates a node-local mount at `/tmp/$USER/rclone/<hostname>/<job_id>/<bucket>`
+2. Creates a symlink from `$BUCKET_DIR/<bucket>` to the mount
+3. Works with SLURM jobs (each job gets isolated mounts)
+
+#### Unmount a bucket
+
+```bash
+cd $BUCKET_DIR
+./s3_bucket_unmount.sh . visionlab-members
+```
+
+**Important:** Always unmount before your SLURM job ends to ensure writes are flushed to S3.
+
+#### Clean up zombie mounts
+
+If mounts get orphaned (job crashed, forgot to unmount), use the sweep script:
+
+```bash
+cd $BUCKET_DIR
+
+# Report orphaned mounts on this node
+./s3_zombie_sweep.sh report
+
+# Fix orphaned mounts
+./s3_zombie_sweep.sh fix
+```
 
 ---
 
