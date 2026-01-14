@@ -227,22 +227,62 @@ echo $UV_CACHE_DIR
 -   Near-instant package installation after the first download
 -   Multiple projects sharing the same packages use almost no extra disk space
 
-### 3. Create Your First Project
+### 3. Create a Test Project
+
+Let's create a test project to verify everything works:
 
 ```bash
-cd $PROJECT_DIR
-mkdir my-project && cd my-project
+cd $SANDBOX_DIR
+mkdir test-project && cd test-project
 uv init
-uv add numpy torch  # Add whatever packages you need
 ```
+
+Now add some packages. The first time you install a package, uv downloads it to the cache:
+
+```bash
+time uv add numpy torch
+```
+
+This may take a minute or two depending on your connection (torch is large).
 
 The project will contain:
 
 -   `pyproject.toml` — project metadata and dependencies
 -   `uv.lock` — exact versions for reproducibility
--   `.venv/` — the virtual environment (gitignore this)
+-   `.venv/` — the virtual environment
 
-### 4. Running Code
+### 4. Verify Cache Works (Hardlinks)
+
+Create a second project with the same dependencies to see the cache in action:
+
+```bash
+cd $SANDBOX_DIR
+mkdir test-project-2 && cd test-project-2
+uv init
+time uv add numpy torch
+```
+
+This should complete in **seconds** (not minutes) because uv hardlinks from the cache instead of downloading.
+
+Verify the disk space savings:
+
+```bash
+# Check apparent size vs actual disk usage
+du -sh $SANDBOX_DIR/test-project/.venv
+du -sh $SANDBOX_DIR/test-project-2/.venv
+
+# Both show ~2GB, but actual disk usage is shared!
+# Check with --apparent-size to see the difference:
+du -sh --apparent-size $SANDBOX_DIR/test-project/.venv
+```
+
+Clean up the test projects when done:
+
+```bash
+rm -rf $SANDBOX_DIR/test-project $SANDBOX_DIR/test-project-2
+```
+
+### 5. Running Code
 
 ```bash
 # Run a script
