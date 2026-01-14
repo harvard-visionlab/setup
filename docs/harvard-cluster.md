@@ -48,8 +48,10 @@ export BUCKET_DIR=${HOLYLABS}/Buckets      # S3 bucket mounts
 export SANDBOX_DIR=${HOLYLABS}/Sandbox     # Testing/scratch
 
 # uv (Python package manager) configuration
-# On holylabs so hardlinks work (same filesystem as projects)
-export UV_CACHE_DIR=${HOLYLABS}/.uv_cache
+# Shared lab cache - first person to install a package benefits everyone
+# Uses alvarez_lab since all visionlab members have access
+export UV_CACHE_DIR=/n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
+# Per-user tools directory
 export UV_TOOL_DIR=${HOLYLABS}/.uv_tools
 
 # AWS configuration
@@ -67,6 +69,12 @@ Save and reload:
 source ~/.bashrc
 ```
 
+**Note on shared uv cache:** The `UV_CACHE_DIR` points to a shared lab directory. When you install a package, it benefits everyone - subsequent installs are near-instant via hardlinks. The directory should already exist with proper permissions. If not, ask George to create it:
+```bash
+mkdir -p /n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
+chmod 2775 /n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
+```
+
 **What each variable does:**
 
 | Variable                | Purpose                                           |
@@ -78,8 +86,8 @@ source ~/.bashrc
 | `PROJECT_DIR`           | Where your git repos live                         |
 | `BUCKET_DIR`            | Where S3 buckets are mounted                      |
 | `SANDBOX_DIR`           | For testing and scratch work                      |
-| `UV_CACHE_DIR`          | Where uv stores downloaded packages               |
-| `UV_TOOL_DIR`           | Where uv tool installs CLI tools (e.g., s5cmd)    |
+| `UV_CACHE_DIR`          | Shared lab cache for uv packages                  |
+| `UV_TOOL_DIR`           | Your uv tools directory (CLI tools like s5cmd)    |
 | `AWS_ACCESS_KEY_ID`     | Your AWS access key (get from George)             |
 | `AWS_SECRET_ACCESS_KEY` | Your AWS secret key (get from George)             |
 | `AWS_REGION`            | AWS region (us-east-1)                            |
@@ -659,7 +667,7 @@ $TIER1                  # /n/alvarez_lab_tier1/Users/$USER
 $PROJECT_DIR            # ${HOLYLABS}/Projects
 $BUCKET_DIR             # ${HOLYLABS}/Buckets
 $SANDBOX_DIR            # ${HOLYLABS}/Sandbox
-$UV_CACHE_DIR           # ${HOLYLABS}/.uv_cache
+$UV_CACHE_DIR           # Shared: /n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
 $UV_TOOL_DIR            # ${HOLYLABS}/.uv_tools
 $AWS_ACCESS_KEY_ID      # Your AWS access key (keep secret!)
 $AWS_SECRET_ACCESS_KEY  # Your AWS secret key (keep secret!)

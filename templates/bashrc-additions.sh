@@ -17,8 +17,10 @@ export BUCKET_DIR=${HOLYLABS}/Buckets      # S3 bucket mounts
 export SANDBOX_DIR=${HOLYLABS}/Sandbox     # Testing/scratch
 
 # uv (Python package manager) configuration
-# On holylabs so hardlinks work (same filesystem as projects)
-export UV_CACHE_DIR=${HOLYLABS}/.uv_cache
+# Shared lab cache - first person to install a package benefits everyone
+# Uses alvarez_lab since all visionlab members have access
+export UV_CACHE_DIR=/n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
+# Per-user tools directory
 export UV_TOOL_DIR=${HOLYLABS}/.uv_tools
 
 # AWS configuration
