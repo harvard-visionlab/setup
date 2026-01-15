@@ -29,13 +29,13 @@ See [FASRC partitions documentation](https://docs.rc.fas.harvard.edu/kb/running-
 
 The cluster has several storage tiers with different characteristics:
 
-| Storage    | Path                                    | Characteristics                                          | Use for                                       |
-| ---------- | --------------------------------------- | -------------------------------------------------------- | --------------------------------------------- |
-| Home       | `~/`                                    | Your home, mounted every job, 100GB limit, persistent    | Config files, symlinks                        |
-| Holylabs   | `/n/holylabs/LABS/${LAB}/Users/$USER/`  | Less performant, inexpensive, persistent                 | Project repos (code), uv cache, not "outputs" |
+| Storage    | Path                                   | Characteristics                                          | Use for                                       |
+| ---------- | -------------------------------------- | -------------------------------------------------------- | --------------------------------------------- |
+| Home       | `~/`                                   | Your home, mounted every job, 100GB limit, persistent    | Config files, symlinks                        |
+| Holylabs   | `/n/holylabs/LABS/${LAB}/Users/$USER/` | Less performant, inexpensive, persistent                 | Project repos (code), uv cache, not "outputs" |
 | Netscratch | `/n/netscratch/${LAB}/Everyone/$USER/` | Free, large, performant, **ephemeral** (monthly cleanup) | Temporary scratch, large intermediate files   |
-| Tier1      | `/n/alvarez_lab_tier1/Users/$USER/`     | Expensive, limited (~8TB), performant, persistent        | Use for big datasets, caches, not "outputs"   |
-| AWS        | cloud storage "s3 buckets"              | Affordable, very large, backed-up (aws 99.99%)           | All outputs (model weights, analysis results) |
+| Tier1      | `/n/alvarez_lab_tier1/Users/$USER/`    | Expensive, limited (~8TB), performant, persistent        | Use for big datasets, caches, not "outputs"   |
+| AWS        | cloud storage "s3 buckets"             | Affordable, very large, backed-up (aws 99.99%)           | All outputs (model weights, analysis results) |
 
 **Warning:** Files on netscratch are automatically deleted during monthly cleanup. Never store anything there that you can't regenerate.
 
@@ -63,7 +63,7 @@ export LAB=alvarez_lab
 # Storage roots
 export MY_WORK_DIR=/n/holylabs/LABS/${LAB}/Users/$USER
 export MY_NETSCRATCH=/n/netscratch/${LAB}/Everyone/$USER
-export LAB_TIER1=/n/alvarez_lab_tier1/Lab/
+export TIER1=/n/alvarez_lab_tier1/Lab/
 
 # Holylabs folder structure
 export PROJECT_DIR=${MY_WORK_DIR}/Projects    # Git repos go here
@@ -90,6 +90,15 @@ export KERAS_HOME=/n/netscratch/alvarez_lab/Lab/.cache/keras
 export AWS_ACCESS_KEY_ID=
 export AWS_SECRET_ACCESS_KEY=
 export AWS_REGION=us-east-1
+
+# Default working directory for interactive shells (e.g., Jupyter terminals)
+if [[ $- == *i* ]]; then
+    if [[ -n "${MY_WORK_DIR}" && -d "${MY_WORK_DIR}" ]]; then
+        cd "${MY_WORK_DIR}"
+    else
+        cd "$HOME"
+    fi
+fi
 ```
 
 Save and exit nano: `Ctrl+X`, then `Y` to confirm save, then `Enter` to confirm filename.
@@ -125,7 +134,7 @@ source ~/.bashrc
 Set up the recommended folder organization:
 
 ```bash
-mkdir -p $HOLYLABS/{Projects,Buckets,Sandbox}
+mkdir -p $MY_WORK_DIR/{Projects,Buckets,Sandbox}
 ```
 
 | Folder      | Purpose                                                                                 |
@@ -441,7 +450,7 @@ AWS CLI v2 is distributed as a standalone binary, not a Python package, so we in
 cd /tmp
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip -o awscliv2.zip
-./aws/install -i $HOLYLABS/.aws-cli -b $HOME/.local/bin --update
+./aws/install -i $MY_WORK_DIR/.aws-cli -b $HOME/.local/bin --update
 ```
 
 This installs the CLI to holylabs (saves home quota) and creates symlinks in `~/.local/bin`.
@@ -940,14 +949,14 @@ uv cache prune             # Clean up old cached packages
 
 ```bash
 $LAB                    # Your lab: alvarez_lab or konkle_lab
-$HOLYLABS               # /n/holylabs/LABS/${LAB}/Users/$USER
-$NETSCRATCH             # /n/netscratch/${LAB}/Everyone/$USER
-$TIER1                  # /n/alvarez_lab_tier1/Users/$USER
-$PROJECT_DIR            # ${HOLYLABS}/Projects
-$BUCKET_DIR             # ${HOLYLABS}/Buckets
-$SANDBOX_DIR            # ${HOLYLABS}/Sandbox
+$MY_WORK_DIR            # /n/holylabs/LABS/${LAB}/Users/$USER
+$MY_NETSCRATCH          # /n/netscratch/${LAB}/Everyone/$USER
+$TIER1                  # /n/alvarez_lab_tier1/Lab/
+$PROJECT_DIR            # ${MY_WORK_DIR}/Projects
+$BUCKET_DIR             # ${MY_WORK_DIR}/Buckets
+$SANDBOX_DIR            # ${MY_WORK_DIR}/Sandbox
 $UV_CACHE_DIR           # Shared: /n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
-$UV_TOOL_DIR            # ${HOLYLABS}/.uv_tools
+$UV_TOOL_DIR            # ${MY_WORK_DIR}/.uv_tools
 $TORCH_HOME             # Shared: /n/netscratch/alvarez_lab/Lab/.cache/torch
 $HF_HOME                # Shared: /n/netscratch/alvarez_lab/Lab/.cache/huggingface
 $KERAS_HOME             # Shared: /n/netscratch/alvarez_lab/Lab/.cache/keras
@@ -959,7 +968,7 @@ $AWS_REGION             # us-east-1
 ### Convenience Aliases
 
 ```bash
-cdh   # cd to holylabs
+cdw   # cd to work dir (holylabs)
 cdn   # cd to netscratch
 cdt   # cd to tier1
 cdp   # cd to projects
