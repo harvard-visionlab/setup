@@ -12,10 +12,10 @@ This guide covers setting up your computing environment on the Harvard FASRC clu
 2. Log in with your Harvard credentials
 3. Select **Jupyter Lab** from the available applications
 4. Configure the session:
-   - **Partition:** `test` (no GPU needed for setup) or `gpu_test` (if you want to verify GPU access)
-   - **CPUs:** 4
-   - **Memory:** 16 GB
-   - **Time:** 1 hour (max for test partitions)
+    - **Partition:** `test` (no GPU needed for setup) or `gpu_test` (if you want to verify GPU access)
+    - **CPUs:** 4
+    - **Memory:** 16 GB
+    - **Time:** 1 hour (max for test partitions)
 5. Launch and wait for the session to start
 6. Open a **Terminal** from the JupyterLab launcher
 
@@ -92,7 +92,7 @@ export AWS_SECRET_ACCESS_KEY=
 export AWS_REGION=us-east-1
 ```
 
-Save and exit nano: `Ctrl+O` (write out), `Enter` to confirm, then `Ctrl+X` (exit).
+Save and exit nano: `Ctrl+X`, then `Y` to confirm save, then `Enter` to confirm filename.
 
 Reload your shell configuration:
 
@@ -100,7 +100,7 @@ Reload your shell configuration:
 source ~/.bashrc
 ```
 
-**Note on shared caches:** Several variables point to shared lab directories. When you install a package or download a model, it benefits everyone. These directories should already exist with proper permissions. If not, ask George to create them:
+**Note on shared caches:** Several variables point to shared lab directories. When you install a package or download a model, it's stored in a shared location so others can access that model without re-downloading. These directories should already exist with proper permissions. If not, ask George to create them:
 
 ```bash
 # Shared uv cache (holylabs - for hardlink support)
