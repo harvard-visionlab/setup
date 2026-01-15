@@ -19,7 +19,7 @@ export SANDBOX_DIR=${MY_WORK_DIR}/Sandbox     # Testing/scratch
 # uv (Python package manager) configuration
 # Shared lab cache - first person to install a package benefits everyone
 # Uses alvarez_lab since all visionlab members have access
-export UV_CACHE_DIR=/n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
+export UV_CACHE_DIR=/n/holylabs/LABS/alvarez_lab/Everyone/.uv_cache
 # Per-user tools directory
 export UV_TOOL_DIR=${MY_WORK_DIR}/.uv_tools
 

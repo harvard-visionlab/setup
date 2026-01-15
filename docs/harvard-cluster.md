@@ -71,7 +71,7 @@ export SANDBOX_DIR=${MY_WORK_DIR}/Sandbox     # Testing/scratch
 # uv (Python package manager) configuration
 # Shared lab cache - first person to install a package benefits everyone
 # Uses alvarez_lab since all visionlab members have access
-export UV_CACHE_DIR=/n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
+export UV_CACHE_DIR=/n/holylabs/LABS/alvarez_lab/Everyone/.uv_cache
 # Per-user tools directory
 export UV_TOOL_DIR=${MY_WORK_DIR}/.uv_tools
 
@@ -295,7 +295,7 @@ If you ran the bashrc setup above, `UV_CACHE_DIR` is already configured. Verify:
 
 ```bash
 echo $UV_CACHE_DIR
-# Should show: /n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
+# Should show: /n/holylabs/LABS/alvarez_lab/Everyone/.uv_cache
 ```
 
 **Why holylabs?** The uv cache and your project virtual environments will both live on holylabs. This allows uv to use hardlinks instead of copying files, which means:
@@ -949,7 +949,7 @@ $TIER1                  # /n/alvarez_lab_tier1/Lab/
 $PROJECT_DIR            # ${MY_WORK_DIR}/Projects
 $BUCKET_DIR             # ${MY_WORK_DIR}/Buckets
 $SANDBOX_DIR            # ${MY_WORK_DIR}/Sandbox
-$UV_CACHE_DIR           # Shared: /n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
+$UV_CACHE_DIR           # Shared: /n/holylabs/LABS/alvarez_lab/Everyone/.uv_cache
 $UV_TOOL_DIR            # ${MY_WORK_DIR}/.uv_tools
 $TORCH_HOME             # Shared: /n/netscratch/alvarez_lab/Lab/.cache/torch
 $HF_HOME                # Shared: /n/netscratch/alvarez_lab/Lab/.cache/huggingface
