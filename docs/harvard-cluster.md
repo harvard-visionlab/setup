@@ -32,9 +32,9 @@ The cluster has several storage tiers with different characteristics:
 | Storage    | Path                                    | Characteristics                                          | Use for                                       |
 | ---------- | --------------------------------------- | -------------------------------------------------------- | --------------------------------------------- |
 | Home       | `~/`                                    | Your home, mounted every job, 100GB limit, persistent    | Config files, symlinks                        |
-| Tier1      | `/n/alvarez_lab_tier1/Users/$USER/`     | Expensive, limited (~8TB), performant, persistent        | Use for big datasets, caches, not "outputs"   |
 | Holylabs   | `/n/holylabs/LABS/${LAB}/Users/$USER/`  | Less performant, inexpensive, persistent                 | Project repos (code), uv cache, not "outputs" |
 | Netscratch | `/n/netscratch/${LAB}/Everyone/$USER/` | Free, large, performant, **ephemeral** (monthly cleanup) | Temporary scratch, large intermediate files   |
+| Tier1      | `/n/alvarez_lab_tier1/Users/$USER/`     | Expensive, limited (~8TB), performant, persistent        | Use for big datasets, caches, not "outputs"   |
 | AWS        | cloud storage "s3 buckets"              | Affordable, very large, backed-up (aws 99.99%)           | All outputs (model weights, analysis results) |
 
 **Warning:** Files on netscratch are automatically deleted during monthly cleanup. Never store anything there that you can't regenerate.
