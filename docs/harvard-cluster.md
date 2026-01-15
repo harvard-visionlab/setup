@@ -24,10 +24,8 @@ This guide covers setting up your computing environment on the Harvard FASRC clu
     -   [Basic S3 Operations](#3-basic-s3-operations)
     -   [Python Access (fsspec)](#4-python-access-fsspec)
     -   [Mounting S3 Buckets (rclone)](#5-mounting-s3-buckets-rclone)
--   [SLURM Basics](#slurm-basics)
--   [Home Directory Symlinks](#home-directory-symlinks)
 -   [Quick Reference](#quick-reference)
--   [Troubleshooting](#troubleshooting)
+-   [Summary](#summary)
 
 ## Getting Started
 
@@ -785,8 +783,6 @@ cd $BUCKET_DIR
 ./s3_bucket_unmount.sh . visionlab-members
 ```
 
-**Important:** Always unmount before your SLURM job ends to ensure writes are flushed to S3.
-
 #### Clean up zombie mounts
 
 If mounts get orphaned (job crashed, forgot to unmount), use the sweep script:
@@ -813,261 +809,15 @@ For new code, prefer **fsspec** (section 4) - it's simpler and doesn't require m
 
 #### Best practices
 
--   **Mount at job start, unmount at job end** - ensures all writes are flushed to S3
--   **Don't leave mounts running** - orphaned mounts can cause issues on shared nodes
+-   **Mounts auto-cleanup when jobs end** - the `/tmp` mount location ensures cleanup when the node releases
 -   **Use the sweep script** if you see stale mounts or "transport endpoint not connected" errors
 -   **One mount per bucket per job** - the scripts handle this automatically
 
 ---
 
-## SLURM Basics
-
-SLURM (Simple Linux Utility for Resource Management) is the job scheduler on the FASRC cluster. It allocates compute resources and manages the queue of jobs.
-
-### Key Concepts
-
-| Term          | Description                                                                |
-| ------------- | -------------------------------------------------------------------------- |
-| **Job**       | A request for compute resources (CPUs, GPUs, memory, time)                 |
-| **Partition** | A group of nodes with similar characteristics (e.g., `gpu`, `gpu_requeue`) |
-| **Node**      | A physical server with CPUs, memory, and possibly GPUs                     |
-| **Task**      | A process within a job (most jobs have one task)                           |
-
-### Common Commands
-
-```bash
-# Submit a job
-sbatch job_script.sh
-
-# Check your jobs
-squeue -u $USER
-
-# Check all jobs on a partition
-squeue -p gpu
-
-# Cancel a job
-scancel <job_id>
-
-# Cancel all your jobs
-scancel -u $USER
-
-# View partition info
-sinfo -p gpu
-
-# View detailed job info
-scontrol show job <job_id>
-
-# Check your fairshare (priority)
-sshare -u $USER
-```
-
-### Interactive Sessions
-
-For debugging or development, request an interactive session:
-
-```bash
-# Basic interactive session (1 hour, 1 CPU)
-salloc -p test -t 1:00:00 --mem=4G
-
-# Interactive GPU session
-salloc -p gpu_test -t 1:00:00 --mem=16G --gres=gpu:1
-
-# Run a command immediately on allocated resources
-srun -p gpu_test -t 1:00:00 --mem=16G --gres=gpu:1 --pty bash
-```
-
-**Tip:** Use `gpu_test` or `test` partitions for quick debugging (max 1 hour). They have higher priority for short jobs.
-
-### Basic Job Script
-
-Create a file called `job.sh`:
-
-```bash
-#!/bin/bash
-#SBATCH --job-name=my_job           # Job name (shows in squeue)
-#SBATCH --partition=gpu             # Partition (queue) to submit to
-#SBATCH --nodes=1                   # Number of nodes
-#SBATCH --ntasks=1                  # Number of tasks (processes)
-#SBATCH --cpus-per-task=4           # CPUs per task
-#SBATCH --gres=gpu:1                # Number of GPUs
-#SBATCH --mem=32G                   # Memory per node
-#SBATCH --time=12:00:00             # Time limit (HH:MM:SS)
-#SBATCH --output=logs/%j.out        # Standard output (%j = job ID)
-#SBATCH --error=logs/%j.err         # Standard error
-
-# Create logs directory if it doesn't exist
-mkdir -p logs
-
-# Load any needed modules (if required)
-# module load cuda/12.2
-
-# Print some job info
-echo "Job ID: $SLURM_JOB_ID"
-echo "Running on: $(hostname)"
-echo "Start time: $(date)"
-
-# Go to project directory
-cd $PROJECT_DIR/my-project
-
-# Run your code
-uv run python train.py
-
-echo "End time: $(date)"
-```
-
-Submit with:
-
-```bash
-sbatch job.sh
-```
-
-### Common Partitions
-
-| Partition        | GPUs       | Time Limit | Notes                                                      |
-| ---------------- | ---------- | ---------- | ---------------------------------------------------------- |
-| `gpu`            | A100, V100 | 7 days     | Standard GPU partition                                     |
-| `gpu_requeue`    | A100, V100 | 7 days     | Lower priority, preemptible, **use for checkpointed jobs** |
-| `gpu_test`       | A100, V100 | 1 hour     | Testing/debugging, high priority                           |
-| `test`           | None       | 1 hour     | CPU-only testing                                           |
-| `serial_requeue` | None       | 7 days     | CPU jobs, preemptible                                      |
-
-**Recommendation:** Use `gpu_requeue` for training jobs that checkpoint regularly. You get better queue times and contribute to cluster efficiency.
-
-### Requesting GPUs
-
-```bash
-#SBATCH --gres=gpu:1          # Any 1 GPU
-#SBATCH --gres=gpu:a100:1     # Specifically 1 A100
-#SBATCH --gres=gpu:2          # 2 GPUs
-```
-
-Check available GPU types:
-
-```bash
-sinfo -p gpu -o "%N %G"
-```
-
-### Job Arrays
-
-Run many similar jobs efficiently:
-
-```bash
-#!/bin/bash
-#SBATCH --job-name=sweep
-#SBATCH --partition=gpu
-#SBATCH --gres=gpu:1
-#SBATCH --array=0-9           # Run 10 jobs with IDs 0-9
-#SBATCH --output=logs/%A_%a.out   # %A=array job ID, %a=task ID
-
-# Each job gets a different SLURM_ARRAY_TASK_ID
-cd $PROJECT_DIR/my-project
-uv run python train.py --seed=$SLURM_ARRAY_TASK_ID
-```
-
-### Monitoring Jobs
-
-```bash
-# Watch your jobs update every 5 seconds
-watch -n 5 'squeue -u $USER'
-
-# Check job efficiency after completion
-seff <job_id>
-
-# See detailed job accounting
-sacct -j <job_id> --format=JobID,JobName,Elapsed,MaxRSS,MaxVMSize,State
-```
-
-### Tips
-
-1. **Always checkpoint:** Save model state periodically so you can resume if preempted or timed out
-2. **Request only what you need:** Smaller resource requests get scheduled faster
-3. **Use `gpu_requeue`:** For long training jobs with checkpointing
-4. **Check your output:** Jobs can fail silently - always check `.err` files
-5. **Clean up:** Delete old logs and temp files to stay within quotas
-
-### Example: Training Script with S3 Mount
-
-```bash
-#!/bin/bash
-#SBATCH --job-name=train_model
-#SBATCH --partition=gpu_requeue
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
-#SBATCH --gres=gpu:1
-#SBATCH --mem=64G
-#SBATCH --time=24:00:00
-#SBATCH --output=logs/%j.out
-#SBATCH --error=logs/%j.err
-
-mkdir -p logs
-
-echo "Starting job $SLURM_JOB_ID on $(hostname)"
-
-cd $PROJECT_DIR/my-project
-
-# Mount S3 bucket for saving checkpoints
-$BUCKET_DIR/s3_bucket_mount.sh $BUCKET_DIR visionlab-members
-
-# Run training
-uv run python train.py \
-    --checkpoint-dir=$BUCKET_DIR/visionlab-members/$USER/checkpoints \
-    --resume-from-latest
-
-# Unmount (flushes writes to S3)
-$BUCKET_DIR/s3_bucket_unmount.sh $BUCKET_DIR visionlab-members
-
-echo "Job completed at $(date)"
-```
-
----
-
-## Home Directory Symlinks
-
-Summary of symlinks set up in [Initial Setup](#2-set-up-home-directory-symlinks):
-
-### Symlinked to Netscratch (ephemeral, ok to lose)
-
-| Directory      | Purpose                                             | Typical size |
-| -------------- | --------------------------------------------------- | ------------ |
-| `~/.cache`     | General application caches (pip, huggingface, etc.) | 10-100+ GB   |
-| `~/.lightning` | StreamingDataset chunks (litdata)                   | 1-50+ GB     |
-
-### Symlinked to Tier1 (persistent)
-
-| Directory  | Purpose                             | Why persistent                     |
-| ---------- | ----------------------------------- | ---------------------------------- |
-| `~/.conda` | Conda environments (if using conda) | Environments take time to recreate |
-
-### Left in Home (small, worth keeping)
-
-| Directory                 | Purpose                       | Notes                       |
-| ------------------------- | ----------------------------- | --------------------------- |
-| `~/.ssh`                  | SSH keys                      | Critical, keep secure       |
-| `~/.config`               | Application configs           | Small                       |
-| `~/.bashrc`, `~/.profile` | Shell config                  | Small                       |
-| `~/.jupyter`              | Jupyter config                | Small                       |
-| `~/.nv`                   | NVIDIA/CUDA compilation cache | Small, expensive to rebuild |
-| `~/.triton`               | Triton GPU compiler cache     | Small, expensive to rebuild |
-
----
-
 ## Quick Reference
 
-### Common uv Commands
-
-```bash
-uv init                    # Initialize a new project
-uv add <package>           # Add a dependency
-uv add <package>==1.2.3    # Add a specific version
-uv remove <package>        # Remove a dependency
-uv sync                    # Install all dependencies from lockfile
-uv run <command>           # Run a command in the environment
-uv lock                    # Update the lockfile
-uv cache prune             # Clean up old cached packages
-```
-
-### Standard Environment Variables
+### Environment Variables
 
 ```bash
 $LAB                    # Your lab: alvarez_lab or konkle_lab
@@ -1084,15 +834,29 @@ $AWS_SECRET_ACCESS_KEY  # Your AWS secret key (keep secret!)
 $AWS_REGION             # us-east-1
 ```
 
-### Convenience Aliases
+### Home Directory Symlinks
+
+Summary of symlinks set up in [Initial Setup](#4-set-up-home-directory-symlinks):
+
+| Directory      | Points to                      | Purpose                              |
+| -------------- | ------------------------------ | ------------------------------------ |
+| `~/.cache`     | `$MY_NETSCRATCH/.cache`        | App caches (pip, huggingface, torch) |
+| `~/.lightning` | `$MY_NETSCRATCH/.lightning`    | StreamingDataset chunks (litdata)    |
+| `~/.conda`     | Tier1 `/Users/$USER/.conda`    | Conda environments (if using conda)  |
+
+Kept in home: `~/.ssh`, `~/.config`, `~/.bashrc`, `~/.jupyter`, `~/.nv`, `~/.triton` (small or critical)
+
+### Common uv Commands
 
 ```bash
-cdw   # cd to work dir (holylabs)
-cdn   # cd to netscratch
-cdt   # cd to tier1
-cdp   # cd to projects
-cdb   # cd to buckets
-cds   # cd to sandbox
+uv init                    # Initialize a new project
+uv add <package>           # Add a dependency
+uv add <package>==1.2.3    # Add a specific version
+uv remove <package>        # Remove a dependency
+uv sync                    # Install all dependencies from lockfile
+uv run <command>           # Run a command in the environment
+uv lock                    # Update the lockfile
+uv cache prune             # Clean up old cached packages
 ```
 
 ### Sharing Projects
@@ -1116,39 +880,27 @@ uv sync
 
 ---
 
-## Troubleshooting
+## Summary
 
-### "No kernel" when selecting Python (uv auto)
+You've now configured your Harvard cluster environment. Here's what you set up:
 
-Make sure ipykernel is installed in the project:
+**Storage architecture:**
 
-```bash
-cd /path/to/your/project
-uv add ipykernel
-```
+-   **Home directory (`~/`)** - Your small login node home (100GB limit). We set up symlinks so large caches don't fill it up.
+-   **Holylabs (`$MY_WORK_DIR`)** - Your working directory for code and projects. This is where your git repos and uv environments live.
+-   **Netscratch (`$MY_NETSCRATCH`)** - Fast, ephemeral storage for temporary files and caches. Cleaned monthly - don't store anything irreplaceable here.
+-   **S3 buckets** - Cloud storage for all outputs (model weights, results, figures). Accessible from anywhere, backed up, and easy to share.
 
-### Package installation is slow
+**Environment management:**
 
-If uv is copying files instead of hardlinking, check that:
+-   **uv** is your Python environment manager (not conda). It's fast, creates reproducible lockfiles, and uses hardlinks for efficient disk usage.
+-   Each project gets its own `.venv` with dependencies tracked in `pyproject.toml` and `uv.lock`.
 
-1. `UV_CACHE_DIR` is set to a path on holylabs
-2. Your project is also on holylabs
-3. You haven't set `UV_LINK_MODE=copy`
+**Workflow:**
 
-### Building from source
+1.  Log in via JupyterLab at [vdi.rc.fas.harvard.edu](https://vdi.rc.fas.harvard.edu)
+2.  Work in `$PROJECT_DIR` for code, `$SANDBOX_DIR` for experiments
+3.  Save all outputs to S3 (`s3://visionlab-members/$USER/...`)
+4.  Use `uv run` to execute code in your project's environment
 
-If you see "Building <package>..." and it takes a long time, that package doesn't have a pre-built wheel for your Python version/platform. Either:
-
--   Use a different version of the package that has wheels
--   Use a different Python version
--   Wait for the build to complete (one-time cost, cached afterward)
-
-### Home directory quota exceeded
-
-Check what's using space:
-
-```bash
-du -sh ~/.* 2>/dev/null | sort -h
-```
-
-Common culprits: `.cache`, `.conda`, `.local`. See [Home Directory Symlinks](#home-directory-symlinks) for the fix.
+**Next steps:** See [SLURM Basics](slurm-basics.md) for submitting batch jobs to the cluster.

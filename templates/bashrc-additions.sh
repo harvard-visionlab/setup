@@ -29,13 +29,13 @@ export AWS_ACCESS_KEY_ID=
 export AWS_SECRET_ACCESS_KEY=
 export AWS_REGION=us-east-1
 
-# Convenience aliases
-alias cdw='cd $MY_WORK_DIR'
-alias cdn='cd $MY_NETSCRATCH'
-alias cdt='cd $TIER1'
-alias cdp='cd $PROJECT_DIR'
-alias cdb='cd $BUCKET_DIR'
-alias cds='cd $SANDBOX_DIR'
+# Convenience aliases (optional - uncomment if desired)
+# alias cdw='cd $MY_WORK_DIR'
+# alias cdn='cd $MY_NETSCRATCH'
+# alias cdt='cd $TIER1'
+# alias cdp='cd $PROJECT_DIR'
+# alias cdb='cd $BUCKET_DIR'
+# alias cds='cd $SANDBOX_DIR'
 
 # Default working directory for interactive shells (e.g., Jupyter terminals)
 if [[ $- == *i* ]]; then
