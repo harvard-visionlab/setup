@@ -100,18 +100,6 @@ Reload your shell configuration:
 source ~/.bashrc
 ```
 
-**Note on shared caches:** Several variables point to shared lab directories. When you install a package or download a model, it's stored in a shared location so others can access that model without re-downloading. These directories should already exist with proper permissions. If not, ask George to create them:
-
-```bash
-# Shared uv cache (holylabs - for hardlink support)
-mkdir -p /n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
-chmod 2775 /n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
-
-# Shared model caches (netscratch - performant, large)
-mkdir -p /n/netscratch/alvarez_lab/Lab/.cache/{torch,huggingface,keras}
-chmod 2775 /n/netscratch/alvarez_lab/Lab/.cache /n/netscratch/alvarez_lab/Lab/.cache/*
-```
-
 **What each variable does:**
 
 | Variable                | Purpose                                           |
