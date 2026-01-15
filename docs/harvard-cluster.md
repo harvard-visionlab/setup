@@ -295,7 +295,7 @@ If you ran the bashrc setup above, `UV_CACHE_DIR` is already configured. Verify:
 
 ```bash
 echo $UV_CACHE_DIR
-# Should show: /n/holylabs/LABS/<your_lab>/Users/<you>/.uv_cache
+# Should show: /n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
 ```
 
 **Why holylabs?** The uv cache and your project virtual environments will both live on holylabs. This allows uv to use hardlinks instead of copying files, which means:
