@@ -4,9 +4,10 @@ Setup guides for Vision Lab members to configure their computing environments.
 
 ## Guides
 
-| Environment           | Guide                                              | Status  |
+| Task                  | Guide                                              | Status  |
 | --------------------- | -------------------------------------------------- | ------- |
-| Harvard FASRC Cluster | [docs/harvard-cluster.md](docs/harvard-cluster.md) | Draft1  |
-| Laptop (macOS/Linux)  | docs/laptop.md                                     | Planned |
+| Setup Cluster Account | docs/getting-cluster-access.md                     | Planned |
+| Configure FASRC Home  | [docs/harvard-cluster.md](docs/harvard-cluster.md) | Draft1  |
+| Configure Laptop      | docs/laptop.md                                     | Planned |
 | Lightning AI          | docs/lightning-ai.md                               | Planned |
 | Lab Workstations      | docs/lab-workstations.md                           | Planned |

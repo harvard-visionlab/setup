@@ -24,6 +24,8 @@ This guide covers setting up your computing environment on the Harvard FASRC clu
     -   [Basic S3 Operations](#3-basic-s3-operations)
     -   [Python Access (fsspec)](#4-python-access-fsspec)
     -   [Mounting S3 Buckets (rclone)](#5-mounting-s3-buckets-rclone)
+-   [GitHub SSH Setup](#github-ssh-setup) *(TODO)*
+-   [VS Code Remote Access](#vs-code-remote-access) *(TODO)*
 -   [Quick Reference](#quick-reference)
 -   [Summary](#summary)
 
@@ -877,6 +879,54 @@ git clone <repo>
 cd <repo>
 uv sync
 ```
+
+---
+
+## GitHub SSH Setup
+
+> **TODO:** This section is a placeholder. Content coming soon.
+
+Set up SSH keys for accessing private GitHub repositories from the cluster.
+
+### Generate SSH Key
+
+*Coming soon*
+
+### Add Key to GitHub
+
+*Coming soon*
+
+### Configure SSH for GitHub
+
+*Coming soon*
+
+### Test Access
+
+*Coming soon*
+
+---
+
+## VS Code Remote Access
+
+> **TODO:** This section is a placeholder. Content coming soon.
+
+Connect to the cluster from VS Code on your laptop for a full IDE experience.
+
+### Install Remote - SSH Extension
+
+*Coming soon*
+
+### Configure SSH Connection
+
+*Coming soon*
+
+### Connect to Cluster
+
+*Coming soon*
+
+### Tips for Remote Development
+
+*Coming soon*
 
 ---
 
