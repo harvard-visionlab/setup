@@ -61,21 +61,21 @@ Add these lines at the end:
 export LAB=alvarez_lab
 
 # Storage roots
-export HOLYLABS=/n/holylabs/LABS/${LAB}/Users/$USER
-export NETSCRATCH=/n/netscratch/${LAB}/Lab/Users/$USER
-export TIER1=/n/alvarez_lab_tier1/Users/$USER
+export MY_WORK_DIR=/n/holylabs/LABS/${LAB}/Users/$USER
+export MY_NETSCRATCH=/n/netscratch/${LAB}/Lab/Users/$USER
+export LAB_TIER1=/n/alvarez_lab_tier1/Lab/
 
 # Holylabs folder structure
-export PROJECT_DIR=${HOLYLABS}/Projects    # Git repos go here
-export BUCKET_DIR=${HOLYLABS}/Buckets      # S3 bucket mounts
-export SANDBOX_DIR=${HOLYLABS}/Sandbox     # Testing/scratch
+export PROJECT_DIR=${MY_WORK_DIR}/Projects    # Git repos go here
+export BUCKET_DIR=${MY_WORK_DIR}/Buckets      # S3 bucket mounts
+export SANDBOX_DIR=${MY_WORK_DIR}/Sandbox     # Testing/scratch
 
 # uv (Python package manager) configuration
 # Shared lab cache - first person to install a package benefits everyone
 # Uses alvarez_lab since all visionlab members have access
 export UV_CACHE_DIR=/n/holylabs/LABS/alvarez_lab/Lab/.uv_cache
 # Per-user tools directory
-export UV_TOOL_DIR=${HOLYLABS}/.uv_tools
+export UV_TOOL_DIR=${MY_WORK_DIR}/.uv_tools
 
 # Shared model caches - first person to download benefits everyone
 # On netscratch: performant, large, ephemeral (models re-download as needed)
@@ -105,9 +105,9 @@ source ~/.bashrc
 | Variable                | Purpose                                           |
 | ----------------------- | ------------------------------------------------- |
 | `LAB`                   | Your lab affiliation, used in storage paths       |
-| `HOLYLABS`              | Root of your holylabs directory                   |
-| `NETSCRATCH`            | Your netscratch directory (temp files, ephemeral) |
-| `TIER1`                 | Your tier1 directory (large datasets, persistent) |
+| `MY_WORK_DIR`           | Your holylabs directory working directory         |
+| `MY_NETSCRATCH`         | Your netscratch directory (temp files, ephemeral) |
+| `TIER1`                 | Lab tier1 directory (large datasets, persistent)  |
 | `PROJECT_DIR`           | Where your git repos live                         |
 | `BUCKET_DIR`            | Where S3 buckets are mounted                      |
 | `SANDBOX_DIR`           | For testing and scratch work                      |
@@ -133,6 +133,24 @@ mkdir -p $HOLYLABS/{Projects,Buckets,Sandbox}
 | `Projects/` | Git repositories. All code should be version controlled and regularly pushed to GitHub. |
 | `Buckets/`  | S3 bucket mounts (see AWS setup section). All outputs should be stored in s3 buckets.   |
 | `Sandbox/`  | Testing, experiments, organize however you like.                                        |
+
+Most of the time, the first thing you do when you connect to a node, or open a terminal, is cd to your $PROJECT_DIR
+
+```
+cd $PROJECT_DIR
+```
+
+And when you start jupyterlab interactive sessions, you can even set your "Working Directory" to your "MY_WORK_DIR"
+
+```
+/n/holylabs/LABS/<your-lab-here>/Users/<your-username-here>
+```
+
+e.g.
+
+```
+/n/holylabs/LABS/alvarez_lab/Users/alvarez
+```
 
 ### 3. Set Up Home Directory Symlinks
 
