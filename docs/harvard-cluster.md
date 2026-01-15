@@ -283,7 +283,7 @@ Run the following in your terminal (from any location, it doesn't matter what lo
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Verify installation (`~/.local/bin` is already in your PATH):
+Check uv version
 
 ```bash
 uv --version
