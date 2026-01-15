@@ -127,7 +127,33 @@ source ~/.bashrc
 | `AWS_SECRET_ACCESS_KEY` | Your AWS secret key (get from George)             |
 | `AWS_REGION`            | AWS region (us-east-1)                            |
 
-### 2. Create Holylabs Folder Structure
+### 2. Verify Storage Access
+
+Run these commands to confirm you have access to the required storage locations:
+
+```bash
+# Check home directory usage
+echo "Home: $(du -sh ~ 2>/dev/null | cut -f1) used of 100GB"
+
+# Check tier1 access
+ls -la $TIER1/ && echo "Tier1 access OK" || echo "No tier1 access"
+
+# Check holylabs access
+ls -la $MY_WORK_DIR/ && echo "Holylabs access OK" || echo "No holylabs access"
+
+# Check netscratch access (may need to create your directory)
+ls -la $MY_NETSCRATCH/ 2>/dev/null && echo "Netscratch access OK" || echo "Netscratch directory doesn't exist yet"
+```
+
+If your netscratch user directory doesn't exist, create it:
+
+```bash
+mkdir -p $MY_NETSCRATCH
+```
+
+If you don't have access to tier1 or holylabs, contact the lab administrator.
+
+### 3. Create Holylabs Folder Structure
 
 Set up the recommended folder organization:
 
@@ -159,7 +185,7 @@ e.g.
 /n/holylabs/LABS/alvarez_lab/Users/alvarez
 ```
 
-### 3. Set Up Home Directory Symlinks
+### 4. Set Up Home Directory Symlinks
 
 Your home directory has a 100GB quota. Many applications create large hidden cache directories that can quickly fill this up. We symlink these to netscratch (ephemeral caches) or tier1 (persistent environments).
 
@@ -242,34 +268,6 @@ You should see arrows (`->`) pointing to the target locations.
 #### What about ~/.nv and ~/.triton?
 
 These CUDA/Triton compiler caches are small (typically < 1 GB combined) but expensive to rebuild. We recommend **keeping them in home** rather than symlinking to netscratch. The monthly cleanup would force recompilation, which can add minutes to your first job after cleanup. The home quota savings aren't worth the annoyance.
-
-### 4. Verify Storage Access
-
-Run these commands to confirm you have access to the required storage locations:
-
-```bash
-# Check home directory usage
-echo "Home: $(du -sh ~ 2>/dev/null | cut -f1) used of 100GB"
-
-# Check tier1 access
-ls -la /n/alvarez_lab_tier1/Users/$USER/ && echo "Tier1 access OK" || echo "No tier1 access"
-
-# Check holylabs access
-ls -la /n/holylabs/LABS/${LAB}/Users/$USER/ && echo "Holylabs access OK" || echo "No holylabs access"
-
-# Check netscratch access (may need to create your directory)
-ls -la $MY_NETSCRATCH/ 2>/dev/null && echo "Netscratch access OK" || echo "Netscratch directory doesn't exist yet"
-```
-
-If your netscratch user directory doesn't exist, create it:
-
-```bash
-mkdir -p $MY_NETSCRATCH
-```
-
-If you don't have access to tier1 or holylabs, contact the lab administrator.
-
----
 
 ## Python Environment Setup with uv
 
