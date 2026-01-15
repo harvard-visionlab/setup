@@ -166,7 +166,7 @@ Your home directory has a 100GB quota. Many applications create large hidden cac
 First, create your netscratch user directory if it doesn't exist:
 
 ```bash
-mkdir -p /n/netscratch/${LAB}/Everyone/$USER
+mkdir -p $MY_NETSCRATCH
 ```
 
 #### ~/.cache → netscratch
@@ -178,8 +178,8 @@ General caches (pip, huggingface models, torch hub, etc.). Safe to delete - ever
 rm -rf ~/.cache
 
 # Create symlink
-mkdir -p /n/netscratch/${LAB}/Everyone/$USER/.cache
-ln -s /n/netscratch/${LAB}/Everyone/$USER/.cache ~/.cache
+mkdir -p $MY_NETSCRATCH/.cache
+ln -s $MY_NETSCRATCH/.cache ~/.cache
 ```
 
 #### ~/.conda → tier1 (if using conda)
@@ -258,13 +258,13 @@ ls -la /n/alvarez_lab_tier1/Users/$USER/ && echo "Tier1 access OK" || echo "No t
 ls -la /n/holylabs/LABS/${LAB}/Users/$USER/ && echo "Holylabs access OK" || echo "No holylabs access"
 
 # Check netscratch access (may need to create your directory)
-ls -la /n/netscratch/${LAB}/Everyone/$USER/ 2>/dev/null && echo "Netscratch access OK" || echo "Netscratch directory doesn't exist yet"
+ls -la $MY_NETSCRATCH/ 2>/dev/null && echo "Netscratch access OK" || echo "Netscratch directory doesn't exist yet"
 ```
 
 If your netscratch user directory doesn't exist, create it:
 
 ```bash
-mkdir -p /n/netscratch/${LAB}/Everyone/$USER
+mkdir -p $MY_NETSCRATCH
 ```
 
 If you don't have access to tier1 or holylabs, contact the lab administrator.

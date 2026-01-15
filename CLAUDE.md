@@ -15,9 +15,7 @@ We are building a comprehensive setup guide covering multiple environments (Harv
 - [x] Created Jupyter kernel spec for uv auto-detection
 - [x] Draft guide started (see `docs/harvard-cluster.md`)
 - [x] Organized repo structure (README, docs/, scripts/, templates/)
-- [x] Created `scripts/setup-bashrc.sh` - interactive bashrc configuration
 - [x] Created `templates/bashrc-additions.sh` - standard lab environment variables
-- [x] Created `scripts/setup-symlinks.sh` - home directory symlink setup
 - [x] Documented symlink strategy (`.cache` -> netscratch, `.conda` -> tier1)
 - [x] AWS/S3 setup section (awscli, s5cmd, fsspec, boto3)
 - [x] S3 bucket mounting scripts (rclone FUSE)
@@ -77,8 +75,6 @@ setup/
 ├── docs/
 │   └── harvard-cluster.md      # Main Harvard cluster setup guide
 ├── scripts/
-│   ├── setup-bashrc.sh         # Bashrc configuration (interactive)
-│   ├── setup-symlinks.sh       # Home directory symlink setup
 │   ├── s3_bucket_mount.sh      # Mount S3 bucket via rclone FUSE
 │   ├── s3_bucket_unmount.sh    # Unmount S3 bucket
 │   └── s3_zombie_sweep.sh      # Clean up orphaned mounts
