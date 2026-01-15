@@ -42,7 +42,7 @@ This guide covers setting up your computing environment on the Harvard FASRC clu
     - **Partition:** `test` (no GPU needed for setup) or `gpu_test` (if you want to verify GPU access)
     - **CPUs:** 4
     - **Memory:** 16 GB
-    - **Time:** 1 hour (max for test partitions)
+    - **Time:** 3 hours
 5. Launch and wait for the session to start
 6. Open a **Terminal** from the JupyterLab launcher
 
