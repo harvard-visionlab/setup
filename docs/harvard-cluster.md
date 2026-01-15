@@ -21,8 +21,6 @@ This guide covers setting up your computing environment on the Harvard FASRC clu
 
 You'll run all the setup commands below in this terminal.
 
-See [FASRC partitions documentation](https://docs.rc.fas.harvard.edu/kb/running-jobs/#Slurm_partitions) for more options.
-
 ---
 
 ## Storage Overview
@@ -188,7 +186,7 @@ ln -s /n/netscratch/${LAB}/Everyone/$USER/.cache ~/.cache
 
 **Important:** Conda environments have hardcoded paths and **cannot be moved**. If you try to move them, they will break. You must delete and rebuild.
 
-If you're new to the cluster, we recommend using **uv** instead of conda - it's faster, more reproducible, and doesn't have this problem. See the [Python Environment Setup](#python-environment-setup-with-uv) section.
+If you're new to the cluster, we recommend using **uv** instead of conda - it's faster, more reproducible, and doesn't have this problem.
 
 If you're an existing conda user and want to set up the symlink:
 
