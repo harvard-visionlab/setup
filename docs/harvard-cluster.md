@@ -123,20 +123,20 @@ source ~/.bashrc
 
 **What each variable does:**
 
-| Variable                | Purpose                                           |
-| ----------------------- | ------------------------------------------------- |
-| `LAB`                   | Your lab affiliation, used in storage paths       |
-| `MY_WORK_DIR`           | Your holylabs directory working directory         |
-| `MY_NETSCRATCH`         | Your netscratch directory (temp files, ephemeral) |
-| `TIER1`                 | Lab tier1 directory (large datasets, persistent)  |
-| `PROJECT_DIR`           | Where your git repos live                         |
-| `BUCKET_DIR`            | Where S3 buckets are mounted                      |
-| `SANDBOX_DIR`           | For testing and scratch work                      |
+| Variable                | Purpose                                             |
+| ----------------------- | --------------------------------------------------- |
+| `LAB`                   | Your lab affiliation, used in storage paths         |
+| `MY_WORK_DIR`           | Your holylabs directory working directory           |
+| `MY_NETSCRATCH`         | Your netscratch directory (temp files, ephemeral)   |
+| `TIER1`                 | Lab tier1 directory (large datasets, persistent)    |
+| `PROJECT_DIR`           | Where your git repos live                           |
+| `BUCKET_DIR`            | Where S3 buckets are mounted                        |
+| `SANDBOX_DIR`           | For testing and scratch work                        |
 | `UV_CACHE_DIR`          | Your uv package cache (holylabs, enables hardlinks) |
 | `UV_TOOL_DIR`           | Your uv tools directory (CLI tools like s5cmd)      |
 | `AWS_ACCESS_KEY_ID`     | Your AWS access key (get from George)               |
-| `AWS_SECRET_ACCESS_KEY` | Your AWS secret key (get from George)             |
-| `AWS_REGION`            | AWS region (us-east-1)                            |
+| `AWS_SECRET_ACCESS_KEY` | Your AWS secret key (get from George)               |
+| `AWS_REGION`            | AWS region (us-east-1)                              |
 
 ### 2. Verify Storage Access
 
@@ -321,7 +321,7 @@ uv init
 Now add some packages:
 
 ```bash
-time uv add numpy torch
+time uv add numpy torch ipykernel
 ```
 
 The first time you install, it may take a minute or two to download (torch is large). Subsequent installs will be **fast** (seconds) thanks to the cache.
@@ -340,7 +340,7 @@ Create a second project with the same dependencies to verify hardlinks:
 cd $SANDBOX_DIR
 mkdir test-project-2 && cd test-project-2
 uv init
-time uv add numpy torch
+time uv add numpy torch ipykernel
 ```
 
 This should be much faster because uv hardlinks from the cache instead of re-downloading.
@@ -384,10 +384,11 @@ cat > ~/.local/share/jupyter/kernels/python-uv/kernel.json << 'EOF'
 EOF
 ```
 
-Verify installation:
+Verify installation from your test project:
 
 ```bash
-jupyter kernelspec list
+cd $SANDBOX/test-project
+uv run jupyter kernelspec list
 ```
 
 #### Add ipykernel to Your Projects
