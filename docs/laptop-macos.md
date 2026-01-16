@@ -167,7 +167,6 @@ Download and install from: https://code.visualstudio.com/
 - **Python** (Microsoft) - Python language support
 - **Pylance** - Fast Python language server
 - **Remote - SSH** - Connect to the cluster from VS Code
-- **GitLens** - Enhanced Git features
 
 Install from the Extensions panel (`Cmd+Shift+X`) or via command line:
 
@@ -175,26 +174,25 @@ Install from the Extensions panel (`Cmd+Shift+X`) or via command line:
 code --install-extension ms-python.python
 code --install-extension ms-python.vscode-pylance
 code --install-extension ms-vscode-remote.remote-ssh
-code --install-extension eamodio.gitlens
 ```
 
 ### Homebrew
 
 Homebrew is the package manager for macOS. Many tools in this guide are installed via Homebrew.
 
-Install Homebrew:
+**Check if already installed:**
+
+```bash
+brew --version
+```
+
+If you see a version number, you're all set. If you see "command not found", install it:
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
 Follow the post-install instructions to add Homebrew to your PATH (it will print these after installation).
-
-Verify:
-
-```bash
-brew --version
-```
 
 ---
 
