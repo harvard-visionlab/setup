@@ -246,7 +246,7 @@ Add these lines:
 
 # Your FASRC username (used for S3 paths, consistent across all systems)
 # This may differ from your local macOS username ($USER)
-export USERNAME=your_fasrc_username_here
+export VISLAB_USERNAME=your_fasrc_username_here
 
 # Work directory - change this to your chosen location
 # Common choices: ~/Work, ~/Documents
@@ -396,8 +396,8 @@ import os
 import fsspec
 
 fs = fsspec.filesystem('s3')
-# Use USERNAME (your FASRC username) for S3 paths, not USER (local macOS username)
-username = os.getenv('USERNAME')
+# Use VISLAB_USERNAME (your FASRC username) for S3 paths, not USER (local macOS username)
+username = os.getenv('VISLAB_USERNAME')
 
 # List your testing directory
 print(f"Listing s3://visionlab-members/{username}/testing/")
@@ -644,7 +644,7 @@ This opens JupyterLab in your browser with the project's environment.
 ### Environment Variables
 
 ```bash
-$USERNAME               # Your FASRC username (for S3 paths)
+$VISLAB_USERNAME               # Your FASRC username (for S3 paths)
 $MY_WORK_DIR            # Your work directory (e.g., ~/Work)
 $PROJECT_DIR            # ${MY_WORK_DIR}/Projects
 $BUCKET_DIR             # ${MY_WORK_DIR}/Buckets
@@ -696,7 +696,7 @@ import os
 import fsspec
 
 fs = fsspec.filesystem('s3')
-username = os.getenv('USERNAME')  # Your FASRC username
+username = os.getenv('VISLAB_USERNAME')  # Your FASRC username
 
 # List files
 fs.ls(f'visionlab-members/{username}/path/')
