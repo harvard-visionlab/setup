@@ -287,6 +287,9 @@ export AWS_DEFAULT_REGION=us-east-1
 export UV_CACHE_DIR=~/.uv_cache
 export UV_TOOL_DIR=~/.uv_tools
 
+# Jupyter configuration (enables "Python (uv auto)" kernel)
+export JUPYTER_PATH=~/.local/share/jupyter
+
 # Add uv tools to PATH (for s5cmd, etc.)
 export PATH="$HOME/.local/bin:$PATH"
 ```
@@ -690,7 +693,7 @@ uv add jupyterlab ipykernel numpy pandas seaborn
 Run JupyterLab:
 
 ```bash
-JUPYTER_PATH=~/.local/share/jupyter uv run jupyter lab
+uv run jupyter lab
 ```
 
 This opens JupyterLab in your browser:
@@ -739,6 +742,7 @@ $AWS_SECRET_ACCESS_KEY  # Your AWS secret key (keep secret!)
 $AWS_DEFAULT_REGION     # us-east-1
 $UV_CACHE_DIR           # ~/.uv_cache
 $UV_TOOL_DIR            # ~/.uv_tools
+$JUPYTER_PATH           # ~/.local/share/jupyter (for uv auto kernel)
 ```
 
 ### Common Commands
