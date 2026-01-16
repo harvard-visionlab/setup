@@ -660,32 +660,47 @@ docker run hello-world
 
 JupyterLab Desktop provides a native app experience for Jupyter notebooks.
 
-Install from: https://github.com/jupyterlab/jupyterlab-desktop/releases
+Download and install from: https://github.com/jupyterlab/jupyterlab-desktop/releases
 
-Or via Homebrew:
+**Quick demo - create a JupyterLab project:**
 
 ```bash
-brew install --cask jupyterlab
+cd $SANDBOX_DIR
+mkdir -p jupyterlab-test && cd jupyterlab-test
+uv init
+uv add jupyterlab ipykernel numpy pandas seaborn
 ```
 
-**Using with uv projects:**
-
-JupyterLab Desktop can use your uv project environments:
-
-1. Open JupyterLab Desktop
-2. Navigate to your project directory
-3. Open a notebook
-4. Select the Python interpreter from your project's `.venv`
-
-Alternatively, run JupyterLab through uv in any project:
+Run JupyterLab:
 
 ```bash
-cd ~/Projects/my-project
-uv add jupyterlab
 uv run jupyter lab
 ```
 
-This opens JupyterLab in your browser with the project's environment.
+This opens JupyterLab in your browser. Create a new notebook and try:
+
+```python
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+# Create sample data
+df = pd.DataFrame({
+    'x': np.random.randn(100),
+    'y': np.random.randn(100)
+})
+
+# Plot
+sns.scatterplot(data=df, x='x', y='y')
+```
+
+Press `Ctrl+C` in terminal to stop JupyterLab when done.
+
+**Clean up:**
+
+```bash
+rm -rf $SANDBOX_DIR/jupyterlab-test
+```
 
 ---
 
