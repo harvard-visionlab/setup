@@ -88,7 +88,7 @@ If you see `id_ed25519` and `id_ed25519.pub` (or `id_rsa` and `id_rsa.pub`), you
 ssh-keygen -t ed25519 -C "your_email@example.com"
 ```
 
-Press Enter to accept the default file location. You can optionally set a passphrase (recommended) or press Enter for no passphrase.
+Press Enter to accept the default file location. When prompted for a passphrase, just press Enter (not required, ok to leave empty).
 
 **Start the SSH agent and add your key:**
 
@@ -97,15 +97,16 @@ eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 ```
 
-**Add key to GitHub:**
+**Add key to GitHub (on the website, not the desktop app):**
 
 1. Copy your public key:
    ```bash
    pbcopy < ~/.ssh/id_ed25519.pub
    ```
-2. Go to GitHub → Settings → SSH and GPG keys → New SSH key
-3. Give it a title (e.g., "MacBook Pro") and paste the key
-4. Click "Add SSH key"
+2. Open https://github.com/settings/keys in your browser
+3. Click "New SSH key"
+4. Give it a title (e.g., "MacBook Pro") and paste the key
+5. Click "Add SSH key"
 
 **Test the connection:**
 
