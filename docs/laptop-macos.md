@@ -244,6 +244,10 @@ Add these lines:
 # Vision Lab Configuration (macOS)
 # ==============================================================================
 
+# Your FASRC username (used for S3 paths, consistent across all systems)
+# This may differ from your local macOS username ($USER)
+export USERNAME=your_fasrc_username_here
+
 # Work directory - change this to your chosen location
 # Common choices: ~/Work, ~/Documents
 export MY_WORK_DIR=~/Work
@@ -392,19 +396,20 @@ import os
 import fsspec
 
 fs = fsspec.filesystem('s3')
-user = os.getenv('USER')
+# Use USERNAME (your FASRC username) for S3 paths, not USER (local macOS username)
+username = os.getenv('USERNAME')
 
 # List your testing directory
-print(f"Listing s3://visionlab-members/{user}/testing/")
+print(f"Listing s3://visionlab-members/{username}/testing/")
 try:
-    files = fs.ls(f'visionlab-members/{user}/testing/')
+    files = fs.ls(f'visionlab-members/{username}/testing/')
     for f in files:
         print(f"  {f}")
 except FileNotFoundError:
     print("  (empty or doesn't exist yet)")
 
 # Write a test file
-test_path = f's3://visionlab-members/{user}/testing/laptop-test.txt'
+test_path = f's3://visionlab-members/{username}/testing/laptop-test.txt'
 with fs.open(test_path, 'w') as f:
     f.write('Hello from my laptop!')
 print(f"\nWrote: {test_path}")
@@ -639,6 +644,7 @@ This opens JupyterLab in your browser with the project's environment.
 ### Environment Variables
 
 ```bash
+$USERNAME               # Your FASRC username (for S3 paths)
 $MY_WORK_DIR            # Your work directory (e.g., ~/Work)
 $PROJECT_DIR            # ${MY_WORK_DIR}/Projects
 $BUCKET_DIR             # ${MY_WORK_DIR}/Buckets
@@ -686,24 +692,26 @@ rclone copy local/ s3_remote:bucket/path/  # Upload
 ### Python S3 Access
 
 ```python
+import os
 import fsspec
 
 fs = fsspec.filesystem('s3')
+username = os.getenv('USERNAME')  # Your FASRC username
 
 # List files
-fs.ls('visionlab-members/user/path/')
+fs.ls(f'visionlab-members/{username}/path/')
 
 # Read/write
-with fs.open('s3://bucket/path/file.txt', 'r') as f:
+with fs.open(f's3://visionlab-members/{username}/file.txt', 'r') as f:
     content = f.read()
 
-with fs.open('s3://bucket/path/file.txt', 'w') as f:
+with fs.open(f's3://visionlab-members/{username}/file.txt', 'w') as f:
     f.write('content')
 
 # Works with pandas
 import pandas as pd
-df = pd.read_parquet('s3://bucket/path/data.parquet')
-df.to_parquet('s3://bucket/path/output.parquet')
+df = pd.read_parquet(f's3://visionlab-members/{username}/data.parquet')
+df.to_parquet(f's3://visionlab-members/{username}/output.parquet')
 ```
 
 ---
