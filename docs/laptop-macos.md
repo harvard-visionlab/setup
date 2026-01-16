@@ -463,12 +463,14 @@ You should see `visionlab-members`, `visionlab-datasets`, etc.
 
 ### 4. Mount a Bucket
 
+We mount your personal folder within the bucket (using `$VISLAB_USERNAME`):
+
 ```bash
 # Create mount point
 mkdir -p /tmp/$USER/rclone/visionlab-members
 
-# Mount in background
-rclone mount s3_remote:visionlab-members /tmp/$USER/rclone/visionlab-members \
+# Mount your folder within the bucket
+rclone mount s3_remote:visionlab-members/$VISLAB_USERNAME /tmp/$USER/rclone/visionlab-members \
     --daemon \
     --vfs-cache-mode writes \
     --dir-cache-time 30s \
@@ -484,7 +486,7 @@ Verify the mount:
 ls $BUCKET_DIR/visionlab-members/
 ```
 
-You should see the contents of the S3 bucket.
+You should see your files within `s3://visionlab-members/$VISLAB_USERNAME/`.
 
 ### 5. Unmount
 
