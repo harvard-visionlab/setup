@@ -26,8 +26,8 @@ This guide covers setting up your local macOS laptop for Vision Lab development 
   - [Configure rclone](#3-configure-rclone)
   - [Download Mount Scripts](#4-download-mount-scripts)
   - [Mount a Bucket](#5-mount-a-bucket)
-  - [Unmount](#6-unmount)
-  - [Clean Up Orphaned Mounts](#7-clean-up-orphaned-mounts)
+  - [Access via Finder](#6-access-via-finder)
+  - [Unmount (optional)](#7-unmount-optional)
 - [Python S3 Access (fsspec)](#python-s3-access-fsspec)
 - [Optional Tools](#optional-tools)
   - [Docker Desktop](#docker-desktop)
@@ -485,46 +485,38 @@ cd $BUCKET_DIR
 ./s3_bucket_mount.sh . visionlab-members
 ```
 
-Verify the mount:
+### 6. Access via Finder
 
-```bash
-ls $BUCKET_DIR/visionlab-members/
-```
+Open Finder and navigate to your Buckets folder:
 
-You should see the contents of the S3 bucket.
+1. Press `Cmd+Shift+G` (Go to Folder)
+2. Enter your bucket path, e.g., `~/Work/Buckets/visionlab-members`
+3. You should see the S3 bucket contents
 
-### 6. Unmount
+**Tip:** Drag your personal folder (`visionlab-members/$VISLAB_USERNAME`) to the Finder sidebar to create a shortcut for quick access.
 
-When done, unmount the bucket:
+You can use Finder to:
+- Browse files in your S3 bucket
+- Drag-and-drop files to upload them
+- Copy/paste files between your laptop and S3
+- Delete files (right-click → Move to Trash)
+
+The mount survives sleep/wake. If you reboot, just re-run the mount script.
+
+### 7. Unmount (optional)
+
+You don't need to unmount regularly. If you ever need to:
 
 ```bash
 cd $BUCKET_DIR
 ./s3_bucket_unmount.sh . visionlab-members
 ```
 
-### 7. Clean Up Orphaned Mounts
-
-If mounts get stuck (e.g., after sleep/wake or crash), use the sweep script:
+If mounts get stuck (e.g., "transport endpoint not connected" errors), use the sweep script:
 
 ```bash
-# Report orphaned mounts
-./s3_zombie_sweep.sh report
-
-# Fix orphaned mounts
 ./s3_zombie_sweep.sh fix
 ```
-
-### When to use mounted buckets
-
-Mount S3 when your code expects local file paths:
-
-- Training frameworks that read data from disk
-- Legacy code using `open()` or `os.path`
-- Tools that don't support S3 URLs
-
-For new code, prefer **fsspec** (next section) - it's simpler and doesn't require mount management.
-
-**Note:** Mounts survive sleep/wake but are lost on reboot. Just re-run the mount script when needed.
 
 ---
 
