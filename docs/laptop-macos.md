@@ -24,8 +24,10 @@ This guide covers setting up your local macOS laptop for Vision Lab development 
   - [Install FUSE-T](#1-install-fuse-t)
   - [Install rclone](#2-install-rclone)
   - [Configure rclone](#3-configure-rclone)
-  - [Mount a Bucket](#4-mount-a-bucket)
-  - [Unmount](#5-unmount)
+  - [Download Mount Scripts](#4-download-mount-scripts)
+  - [Mount a Bucket](#5-mount-a-bucket)
+  - [Unmount](#6-unmount)
+  - [Clean Up Orphaned Mounts](#7-clean-up-orphaned-mounts)
 - [Python S3 Access (fsspec)](#python-s3-access-fsspec)
 - [Optional Tools](#optional-tools)
   - [Docker Desktop](#docker-desktop)
@@ -461,23 +463,26 @@ rclone lsd s3_remote:
 
 You should see `visionlab-members`, `visionlab-datasets`, etc.
 
-### 4. Mount a Bucket
+### 4. Download Mount Scripts
 
-We mount your personal folder within the bucket (using `$VISLAB_USERNAME`):
+Download the cross-platform mount scripts:
 
 ```bash
-# Create mount point
-mkdir -p /tmp/$USER/rclone/visionlab-members
+cd $BUCKET_DIR
 
-# Mount your folder within the bucket
-rclone mount s3_remote:visionlab-members/$VISLAB_USERNAME /tmp/$USER/rclone/visionlab-members \
-    --daemon \
-    --vfs-cache-mode writes \
-    --dir-cache-time 30s \
-    --log-file /tmp/$USER/rclone-visionlab-members.log
+# Download scripts
+curl -O https://raw.githubusercontent.com/harvard-visionlab/setup-guide/main/scripts/s3_bucket_mount.sh
+curl -O https://raw.githubusercontent.com/harvard-visionlab/setup-guide/main/scripts/s3_bucket_unmount.sh
+curl -O https://raw.githubusercontent.com/harvard-visionlab/setup-guide/main/scripts/s3_zombie_sweep.sh
 
-# Create symlink for easy access
-ln -sf /tmp/$USER/rclone/visionlab-members $BUCKET_DIR/visionlab-members
+chmod +x s3_bucket_mount.sh s3_bucket_unmount.sh s3_zombie_sweep.sh
+```
+
+### 5. Mount a Bucket
+
+```bash
+cd $BUCKET_DIR
+./s3_bucket_mount.sh . visionlab-members
 ```
 
 Verify the mount:
@@ -486,15 +491,27 @@ Verify the mount:
 ls $BUCKET_DIR/visionlab-members/
 ```
 
-You should see your files within `s3://visionlab-members/$VISLAB_USERNAME/`.
+You should see the contents of the S3 bucket.
 
-### 5. Unmount
+### 6. Unmount
 
 When done, unmount the bucket:
 
 ```bash
-umount /tmp/$USER/rclone/visionlab-members
-rm $BUCKET_DIR/visionlab-members
+cd $BUCKET_DIR
+./s3_bucket_unmount.sh . visionlab-members
+```
+
+### 7. Clean Up Orphaned Mounts
+
+If mounts get stuck (e.g., after sleep/wake or crash), use the sweep script:
+
+```bash
+# Report orphaned mounts
+./s3_zombie_sweep.sh report
+
+# Fix orphaned mounts
+./s3_zombie_sweep.sh fix
 ```
 
 ### When to use mounted buckets
@@ -506,6 +523,8 @@ Mount S3 when your code expects local file paths:
 - Tools that don't support S3 URLs
 
 For new code, prefer **fsspec** (next section) - it's simpler and doesn't require mount management.
+
+**Note:** Mounts survive sleep/wake but are lost on reboot. Just re-run the mount script when needed.
 
 ---
 

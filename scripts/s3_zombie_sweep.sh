@@ -1,89 +1,95 @@
 #!/bin/bash
 #
-# Scan the current node for rclone FUSE mounts and report/clean up orphans.
-# See: https://github.com/harvard-visionlab/setup-guide/blob/main/docs/harvard-cluster.md#5-mounting-s3-buckets-rclone
+# Scan for orphaned rclone FUSE mounts and clean them up (cross-platform).
+# See: https://github.com/harvard-visionlab/setup-guide
 #
-# Orphaned mounts can occur when:
-#   - A SLURM job crashes without unmounting
-#   - You forgot to unmount before ending an interactive session
-#   - The rclone process died unexpectedly
+# Orphaned mounts occur when:
+#   - A job/session ends without unmounting
+#   - The rclone process crashes
+#   - You forgot to unmount before closing terminal
 #
 # Usage:
-#   ./s3_zombie_sweep.sh            # report only (default)
-#   ./s3_zombie_sweep.sh report     # report only
-#   ./s3_zombie_sweep.sh fix        # kill orphan rclone processes and unmount
+#   ./s3_zombie_sweep.sh          # report only (default)
+#   ./s3_zombie_sweep.sh report   # report only
+#   ./s3_zombie_sweep.sh fix      # unmount orphans
 
 set -euo pipefail
 
 MODE="${1:-report}"
-HOST_SHORT="$(hostname -s || echo node)"
-USER_NAME="$(id -un)"
-USER_ID="$(id -u)"
+USER="${USER:-$(whoami)}"
 
-echo "Host: ${HOST_SHORT}  User: ${USER_NAME} (UID ${USER_ID})"
-echo "Mode: ${MODE}"
-echo
+# Platform detection
+OS="$(uname -s)"
+case "$OS" in
+  Darwin) PLATFORM="macos" ;;
+  Linux)  PLATFORM="linux" ;;
+  *)      echo "ERROR: Unsupported OS: $OS"; exit 1 ;;
+esac
 
-# List: remote and mountpoint for fuse.rclone lines
-mapfile -t MOUNTS < <(mount | awk '/type fuse\.rclone/ {print $1"||"$3}')
+echo "Platform: ${PLATFORM}"
+echo "User:     ${USER}"
+echo "Mode:     ${MODE}"
+echo ""
 
-if [ ${#MOUNTS[@]} -eq 0 ]; then
-  echo "No rclone FUSE mounts found on this node."
+# Find rclone mounts - platform specific parsing
+if [ "$PLATFORM" = "linux" ]; then
+  # Linux: look for "type fuse.rclone"
+  MOUNTS=$(mount | grep "type fuse.rclone" | awk '{print $1 "||" $3}' || true)
+else
+  # macOS: look for rclone in mount output (format differs)
+  MOUNTS=$(mount | grep "rclone" | awk '{print $1 "||" $3}' || true)
+fi
+
+if [ -z "$MOUNTS" ]; then
+  echo "No rclone FUSE mounts found."
   exit 0
 fi
 
-printf "%-42s  %-64s  %-s\n" "REMOTE" "MOUNTPOINT" "STATUS"
-printf "%-42s  %-64s  %-s\n" "------" "----------" "------"
+printf "%-40s  %-50s  %s\n" "REMOTE" "MOUNTPOINT" "STATUS"
+printf "%-40s  %-50s  %s\n" "------" "----------" "------"
 
-# Helper: unmount one mountpoint safely
-unmount_one() {
+# Platform-specific unmount
+do_unmount() {
   local mp="$1"
-  /bin/umount -l -- "$mp" 2>/dev/null \
-    || (command -v fusermount3 >/dev/null 2>&1 && fusermount3 -uz -- "$mp" 2>/dev/null) \
-    || (command -v fusermount  >/dev/null 2>&1 && fusermount  -uz -- "$mp" 2>/dev/null) \
-    || return 1
-
-  # Clean empty directories
-  case "$mp" in
-    "/tmp/$USER/rclone/"*)
-      rmdir "$mp" 2>/dev/null || true
-      rmdir "$(dirname "$mp")" 2>/dev/null || true
-      rmdir "$(dirname "$(dirname "$mp")")" 2>/dev/null || true
-      ;;
-  esac
+  if [ "$PLATFORM" = "linux" ]; then
+    fusermount3 -uz "$mp" 2>/dev/null || \
+    fusermount -uz "$mp" 2>/dev/null || \
+    /bin/umount -l "$mp" 2>/dev/null || return 1
+  else
+    umount "$mp" 2>/dev/null || return 1
+  fi
   return 0
 }
 
-for line in "${MOUNTS[@]}"; do
+echo "$MOUNTS" | while IFS= read -r line; do
+  [ -z "$line" ] && continue
+
   remote="${line%%||*}"
   mp="${line##*||}"
   bucket="${remote#*:}"
 
   # Check if there's a live rclone process for this bucket
-  if pgrep -fa "rclone mount .*${bucket}(\$|[^[:alnum:]_-])" >/dev/null 2>&1; then
-    status="OK (owned by rclone)"
+  if pgrep -f "rclone mount.*${bucket}" >/dev/null 2>&1; then
+    status="OK (rclone running)"
   else
-    status="ORPHAN (no rclone pid)"
+    status="ORPHAN (no rclone process)"
   fi
 
-  printf "%-42s  %-64s  %-s\n" "$remote" "$mp" "$status"
+  printf "%-40s  %-50s  %s\n" "$remote" "$mp" "$status"
 
-  if [ "$MODE" = "fix" ] && [ "$status" != "OK (owned by rclone)" ]; then
-    # Kill any stale rclone for this bucket
-    pkill -f "rclone mount .*${bucket}(\$|[^[:alnum:]_-])" 2>/dev/null || true
-    if mountpoint -q "$mp" 2>/dev/null; then
-      if unmount_one "$mp"; then
-        printf "  -> cleaned: %s\n" "$mp"
-      else
-        printf "  -> FAILED to unmount: %s\n" "$mp"
-      fi
+  # Fix orphans if requested
+  if [ "$MODE" = "fix" ] && [[ "$status" == ORPHAN* ]]; then
+    echo "  -> Cleaning up..."
+    if do_unmount "$mp"; then
+      echo "  -> Unmounted"
+      rmdir "$mp" 2>/dev/null || true
     else
-      printf "  -> already gone: %s\n" "$mp"
+      echo "  -> Failed to unmount"
     fi
   fi
 done
 
-echo
+echo ""
 if [ "$MODE" = "fix" ]; then
   echo "Sweep complete."
 else
