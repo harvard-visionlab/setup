@@ -200,24 +200,30 @@ Follow the post-install instructions to add Homebrew to your PATH (it will print
 
 **Important:** Keep your code repositories outside of cloud-synced folders (Dropbox, iCloud, Google Drive). These services can corrupt Git repositories and cause sync conflicts.
 
-Recommended structure:
+Choose a local folder as your work directory. Common choices:
+
+- `~/Work` - dedicated work folder
+- `~/Documents` - if you prefer keeping everything in Documents
+
+Within your work directory, we recommend this structure:
 
 ```
-~/Documents/GitHub/    # All your Git repositories go here
-~/Buckets/             # S3 bucket mounts (optional)
-~/Sandbox/             # Testing and scratch work
+~/Work/                # Your chosen work directory (MY_WORK_DIR)
+├── Projects/          # Git repositories go here
+├── Buckets/           # S3 bucket mounts (optional)
+└── Sandbox/           # Testing and scratch work
 ```
 
-Create the directories:
+Create the directories (using `~/Work` as an example):
 
 ```bash
-mkdir -p ~/Documents/GitHub ~/Buckets ~/Sandbox
+mkdir -p ~/Work/Projects ~/Work/Buckets ~/Work/Sandbox
 ```
 
 When you clone lab repositories:
 
 ```bash
-cd ~/Documents/GitHub
+cd ~/Work/Projects
 git clone git@github.com:harvard-visionlab/some-project.git
 ```
 
@@ -238,16 +244,20 @@ Add these lines:
 # Vision Lab Configuration (macOS)
 # ==============================================================================
 
+# Work directory - change this to your chosen location
+# Common choices: ~/Work, ~/Documents
+export MY_WORK_DIR=~/Work
+
+# Directory structure (relative to MY_WORK_DIR)
+export PROJECT_DIR=${MY_WORK_DIR}/Projects   # Git repos
+export BUCKET_DIR=${MY_WORK_DIR}/Buckets     # S3 bucket mounts
+export SANDBOX_DIR=${MY_WORK_DIR}/Sandbox    # Testing/scratch
+
 # AWS credentials - get these from George
 # IMPORTANT: Keep these secret! Never commit to git or share publicly.
 export AWS_ACCESS_KEY_ID=your_access_key_here
 export AWS_SECRET_ACCESS_KEY=your_secret_key_here
-export AWS_REGION=us-east-1
-
-# Local directory structure
-export PROJECT_DIR=~/Documents/GitHub  # Git repos (NOT in Dropbox/iCloud!)
-export BUCKET_DIR=~/Buckets            # S3 bucket mounts
-export SANDBOX_DIR=~/Sandbox           # Testing/scratch
+export AWS_DEFAULT_REGION=us-east-1
 
 # uv configuration
 export UV_CACHE_DIR=~/.uv_cache
@@ -625,12 +635,13 @@ This opens JupyterLab in your browser with the project's environment.
 ### Environment Variables
 
 ```bash
+$MY_WORK_DIR            # Your work directory (e.g., ~/Work)
+$PROJECT_DIR            # ${MY_WORK_DIR}/Projects
+$BUCKET_DIR             # ${MY_WORK_DIR}/Buckets
+$SANDBOX_DIR            # ${MY_WORK_DIR}/Sandbox
 $AWS_ACCESS_KEY_ID      # Your AWS access key (keep secret!)
 $AWS_SECRET_ACCESS_KEY  # Your AWS secret key (keep secret!)
-$AWS_REGION             # us-east-1
-$PROJECT_DIR            # ~/Documents/GitHub
-$BUCKET_DIR             # ~/Buckets
-$SANDBOX_DIR            # ~/Sandbox
+$AWS_DEFAULT_REGION     # us-east-1
 $UV_CACHE_DIR           # ~/.uv_cache
 $UV_TOOL_DIR            # ~/.uv_tools
 ```
