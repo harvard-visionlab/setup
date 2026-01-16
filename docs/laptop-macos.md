@@ -338,10 +338,15 @@ If empty, get your credentials from George and add them to `~/.zshrc`.
 **AWS CLI v2:**
 
 ```bash
-cd /tmp
 curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
-sudo installer -pkg AWSCLIV2.pkg -target /
-rm AWSCLIV2.pkg
+sudo installer -pkg ./AWSCLIV2.pkg -target /
+```
+
+Verify installation:
+
+```bash
+which aws       # Should show /usr/local/bin/aws
+aws --version   # Should show aws-cli/2.x.x ...
 ```
 
 **s5cmd** (fast parallel S3 operations):
@@ -350,10 +355,9 @@ rm AWSCLIV2.pkg
 uv tool install s5cmd
 ```
 
-Verify installation:
+Verify:
 
 ```bash
-aws --version   # Should show v2.x
 s5cmd version   # Should show v2.x
 ```
 
