@@ -358,7 +358,7 @@ echo $AWS_ACCESS_KEY_ID | head -c 8
 # Should show first 8 characters of your key
 ```
 
-If empty, get your credentials from George and add them to `~/.zshrc`.
+If empty, Slack George (`@grez72`) to get your credentials, then add them to `~/.zshrc`.
 
 ### 2. Install AWS CLI Tools
 
