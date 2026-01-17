@@ -2,6 +2,8 @@
 
 Setup guides for Vision Lab members to configure their computing environments.
 
+**Already set up?** Check the [Changelog](docs/changelog.md) for updates you may need to apply.
+
 ## Guides
 
 | Task                  | Guide                                              | Status  |

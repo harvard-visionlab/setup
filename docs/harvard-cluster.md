@@ -88,7 +88,8 @@ export LAB=alvarez_lab
 # Storage roots
 export MY_WORK_DIR=/n/holylabs/LABS/${LAB}/Users/$USER
 export MY_NETSCRATCH=/n/netscratch/${LAB}/Everyone/$USER
-export TIER1=/n/alvarez_lab_tier1/Lab/
+export LAB_NETSCRATCH=/n/netscratch/${LAB}/Everyone
+export LAB_TIER1=/n/alvarez_lab_tier1/Lab/
 
 # Holylabs folder structure
 export PROJECT_DIR=${MY_WORK_DIR}/Projects    # Git repos go here
@@ -106,7 +107,7 @@ export UV_TOOL_DIR=${MY_WORK_DIR}/.uv_tools
 # potentially tens of thousands of dollars, and could bork the entire lab infrastructure
 export AWS_ACCESS_KEY_ID=
 export AWS_SECRET_ACCESS_KEY=
-export AWS_REGION=us-east-1
+export AWS_DEFAULT_REGION=us-east-1
 
 # Default working directory for interactive shells (e.g., Jupyter terminals)
 if [[ $- == *i* ]]; then
@@ -128,20 +129,21 @@ source ~/.bashrc
 
 **What each variable does:**
 
-| Variable                | Purpose                                             |
-| ----------------------- | --------------------------------------------------- |
-| `LAB`                   | Your lab affiliation, used in storage paths         |
-| `MY_WORK_DIR`           | Your holylabs directory working directory           |
-| `MY_NETSCRATCH`         | Your netscratch directory (temp files, ephemeral)   |
-| `TIER1`                 | Lab tier1 directory (large datasets, persistent)    |
-| `PROJECT_DIR`           | Where your git repos live                           |
-| `BUCKET_DIR`            | Where S3 buckets are mounted                        |
-| `SANDBOX_DIR`           | For testing and scratch work                        |
-| `UV_CACHE_DIR`          | Your uv package cache (holylabs, enables hardlinks) |
-| `UV_TOOL_DIR`           | Your uv tools directory (CLI tools like s5cmd)      |
-| `AWS_ACCESS_KEY_ID`     | Your AWS access key (get from George)               |
-| `AWS_SECRET_ACCESS_KEY` | Your AWS secret key (get from George)               |
-| `AWS_REGION`            | AWS region (us-east-1)                              |
+| Variable                | Purpose                                              |
+| ----------------------- | ---------------------------------------------------- |
+| `LAB`                   | Your lab affiliation, used in storage paths          |
+| `MY_WORK_DIR`           | Your holylabs directory working directory            |
+| `MY_NETSCRATCH`         | Your netscratch directory (temp files, ephemeral)    |
+| `LAB_NETSCRATCH`        | Shared lab netscratch (for shared caches like litdata) |
+| `LAB_TIER1`             | Lab tier1 directory (large datasets, persistent)     |
+| `PROJECT_DIR`           | Where your git repos live                            |
+| `BUCKET_DIR`            | Where S3 buckets are mounted                         |
+| `SANDBOX_DIR`           | For testing and scratch work                         |
+| `UV_CACHE_DIR`          | Your uv package cache (holylabs, enables hardlinks)  |
+| `UV_TOOL_DIR`           | Your uv tools directory (CLI tools like s5cmd)       |
+| `AWS_ACCESS_KEY_ID`     | Your AWS access key (get from George)                |
+| `AWS_SECRET_ACCESS_KEY` | Your AWS secret key (get from George)                |
+| `AWS_DEFAULT_REGION`    | AWS region (us-east-1)                               |
 
 ### 2. Verify Storage Access
 
@@ -156,7 +158,7 @@ ls -la $MY_WORK_DIR/ && echo "✅ Holylabs access OK" || echo "🚫 No holylabs 
 ls -la $MY_NETSCRATCH/ 2>/dev/null && echo "✅ Netscratch access OK" || echo "🚫 Netscratch directory doesn't exist yet"
 
 # Check tier1 access
-ls -la $TIER1/ && echo "Tier1 access OK" || echo "🚫 No tier1 access"
+ls -la $LAB_TIER1/ && echo "Tier1 access OK" || echo "🚫 No tier1 access"
 
 # Check home directory usage (could take a couple of minutes)
 echo "Home: $(du -sh ~ 2>/dev/null | cut -f1) used of 100GB"
@@ -254,17 +256,17 @@ ln -s /n/alvarez_lab_tier1/Users/$USER/.conda ~/.conda
 
 Skip this step if you don't use conda or plan to switch to uv.
 
-#### ~/.lightning → netscratch
+#### ~/.lightning → shared lab netscratch
 
-Lightning AI's `litdata` library caches StreamingDataset chunks here.
+Lightning AI's `litdata` library caches StreamingDataset chunks here. We use a shared lab location so all lab members share the same cached datasets instead of downloading separate copies.
 
 ```bash
 # Remove existing lightning directory
 rm -rf ~/.lightning
 
-# Create symlink to your netscratch
-mkdir -p $MY_NETSCRATCH/.lightning
-ln -s $MY_NETSCRATCH/.lightning ~/.lightning
+# Create symlink to shared lab netscratch
+mkdir -p $LAB_NETSCRATCH/.lightning
+ln -s $LAB_NETSCRATCH/.lightning ~/.lightning
 ```
 
 #### Verify symlinks
@@ -825,7 +827,8 @@ For new code, prefer **fsspec** (section 4) - it's simpler and doesn't require m
 $LAB                    # Your lab: alvarez_lab or konkle_lab
 $MY_WORK_DIR            # /n/holylabs/LABS/${LAB}/Users/$USER
 $MY_NETSCRATCH          # /n/netscratch/${LAB}/Everyone/$USER
-$TIER1                  # /n/alvarez_lab_tier1/Lab/
+$LAB_NETSCRATCH         # /n/netscratch/${LAB}/Everyone (shared)
+$LAB_TIER1              # /n/alvarez_lab_tier1/Lab/
 $PROJECT_DIR            # ${MY_WORK_DIR}/Projects
 $BUCKET_DIR             # ${MY_WORK_DIR}/Buckets
 $SANDBOX_DIR            # ${MY_WORK_DIR}/Sandbox
@@ -833,18 +836,18 @@ $UV_CACHE_DIR           # ${MY_WORK_DIR}/.uv_cache
 $UV_TOOL_DIR            # ${MY_WORK_DIR}/.uv_tools
 $AWS_ACCESS_KEY_ID      # Your AWS access key (keep secret!)
 $AWS_SECRET_ACCESS_KEY  # Your AWS secret key (keep secret!)
-$AWS_REGION             # us-east-1
+$AWS_DEFAULT_REGION     # us-east-1
 ```
 
 ### Home Directory Symlinks
 
 Summary of symlinks set up in [Initial Setup](#4-set-up-home-directory-symlinks):
 
-| Directory      | Points to                      | Purpose                              |
-| -------------- | ------------------------------ | ------------------------------------ |
-| `~/.cache`     | `$MY_NETSCRATCH/.cache`        | App caches (pip, huggingface, torch) |
-| `~/.lightning` | `$MY_NETSCRATCH/.lightning`    | StreamingDataset chunks (litdata)    |
-| `~/.conda`     | Tier1 `/Users/$USER/.conda`    | Conda environments (if using conda)  |
+| Directory      | Points to                      | Purpose                                   |
+| -------------- | ------------------------------ | ----------------------------------------- |
+| `~/.cache`     | `$MY_NETSCRATCH/.cache`        | App caches (pip, huggingface, torch)      |
+| `~/.lightning` | `$LAB_NETSCRATCH/.lightning`   | StreamingDataset chunks (shared by lab)   |
+| `~/.conda`     | Tier1 `/Users/$USER/.conda`    | Conda environments (if using conda)       |
 
 Kept in home: `~/.ssh`, `~/.config`, `~/.bashrc`, `~/.jupyter`, `~/.nv`, `~/.triton` (small or critical)
 
