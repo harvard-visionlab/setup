@@ -193,8 +193,3 @@ ssh holylogin05
 
 # Or use VS Code Remote to connect directly
 ```
-
-## Next Steps
-
-- **[Using the Cluster](cluster-usage.md)** - Interactive sessions and access methods
-- **[SLURM Basics](slurm-basics.md)** - Submitting batch jobs

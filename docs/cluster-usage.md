@@ -147,9 +147,3 @@ For technical details: https://docs.rc.fas.harvard.edu/kb/fairshare/
 - Check your working directory setting
 - Ensure you're looking in the right storage location (holylabs, not home)
 - Verify your storage access with George if needed
-
-## Next Steps
-
-- **[Terminal & SSH Setup](terminal-ssh-setup.md)** - Advanced SSH configuration for power users
-- **[SLURM Basics](slurm-basics.md)** - How to submit batch jobs
-- **[Compute Guidelines](compute-guidelines.md)** - Lab policies and best practices

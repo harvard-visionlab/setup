@@ -63,10 +63,3 @@ George will set up your AWS credentials and let you know when they're ready. You
 - AWS Secret Access Key
 
 Keep these secure. You'll configure them during the [laptop setup](laptop-macos.md) and [cluster setup](harvard-cluster.md).
-
-## Next Steps
-
-While waiting for AWS credentials, you can proceed with:
-
-1. **[Configure your laptop](laptop-macos.md)** - Install tools and configure your local environment
-2. **[Get cluster access](getting-cluster-access.md)** - Set up VPN, 2FA, and verify SSH access

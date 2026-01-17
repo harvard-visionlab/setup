@@ -99,11 +99,3 @@ Verify you can launch an interactive session:
 4. Try launching a session on the `gpu_test` partition
 
 If the session launches successfully, your access is fully configured.
-
-## Next Steps
-
-Once you have cluster access:
-
-1. **[Configure your cluster environment](harvard-cluster.md)** - Set up your shell, storage paths, and tools
-2. **[Learn cluster usage](cluster-usage.md)** - How to use interactive sessions and submit jobs
-3. **[Review compute guidelines](compute-guidelines.md)** - Lab policies and best practices
