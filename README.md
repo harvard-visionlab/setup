@@ -18,11 +18,10 @@ Setup guides for Vision Lab members to configure their computing environments.
 
 ## Advanced Configurations
 
-| Task                 | Guide                                                    | Status |
-| -------------------- | -------------------------------------------------------- | ------ |
-| Using the Cluster    | [docs/cluster-usage.md](docs/cluster-usage.md)           | Draft  |
-| Terminal & SSH Setup | [docs/terminal-ssh-setup.md](docs/terminal-ssh-setup.md) | Draft  |
-| Compute Guidelines   | [docs/compute-guidelines.md](docs/compute-guidelines.md) | Draft  |
+| Task                 | Guide                                                    | Status  |
+| -------------------- | -------------------------------------------------------- | ------- |
+| Terminal & SSH Setup | [docs/terminal-ssh-setup.md](docs/terminal-ssh-setup.md) | Draft   |
+| Using the Cluster    | docs/cluster-usage.md                                    | Planned |
 
 ## Project Management, Project Templates, and Workflows
 
